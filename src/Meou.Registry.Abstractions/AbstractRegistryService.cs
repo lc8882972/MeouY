@@ -7,17 +7,26 @@ using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Threading;
 using static Meou.Registry.Abstractions.RegisterMeta;
+using Microsoft.Extensions.Logging;
 
 namespace Meou.Registry.Abstractions
 {
     public abstract class AbstractRegistryService : RegistryService
     {
+        public ILogger logger;
+
+        public AbstractRegistryService(ILoggerFactory loggerFactory)
+        {
+            this.logger = loggerFactory.CreateLogger<AbstractRegistryService>();
+        }
+
         private bool shutdown = false;
 
         private BlockingCollection<RegisterMeta> queue = new BlockingCollection<RegisterMeta>();
         private Dictionary<RegisterMeta.ServiceMeta, KeyValuePair<long, List<RegisterMeta>>> registries = new Dictionary<RegisterMeta.ServiceMeta, KeyValuePair<long, List<RegisterMeta>>>();
-        private ConcurrentDictionary<RegisterMeta.ServiceMeta, List<NotifyListener>> subscribeListeners = new ConcurrentDictionary<RegisterMeta.ServiceMeta, List<NotifyListener>>();
-        private ConcurrentDictionary<RegisterMeta.Address, List<OfflineListener>> offlineListeners = new ConcurrentDictionary<RegisterMeta.Address, List<OfflineListener>>();
+
+        private ConcurrentDictionary<RegisterMeta.ServiceMeta, BlockingCollection<NotifyListener>> subscribeListeners = new ConcurrentDictionary<RegisterMeta.ServiceMeta, BlockingCollection<NotifyListener>>();
+        private ConcurrentDictionary<RegisterMeta.Address, BlockingCollection<OfflineListener>> offlineListeners = new ConcurrentDictionary<RegisterMeta.Address, BlockingCollection<OfflineListener>>();
 
         // Consumer已订阅的信息
         private HashSet<ServiceMeta> subscribeSet = new HashSet<ServiceMeta>();
@@ -25,8 +34,10 @@ namespace Meou.Registry.Abstractions
         private HashSet<RegisterMeta> registerMetaSet = new HashSet<RegisterMeta>();
 
         private Thread thread;
-        public void connectToRegistryServer(string connectString)
+        public virtual void connectToRegistryServer(string connectString)
         {
+            System.Collections.Concurrent.BlockingCollection<OfflineListener> c = new BlockingCollection<OfflineListener>();
+            
             this.thread = new Thread(() =>
             {
                 while (!shutdown)
@@ -41,10 +52,10 @@ namespace Meou.Registry.Abstractions
                     {
                         if (meta != null)
                         {
-                            //if (logger.isWarnEnabled())
-                            //{
-                            //    logger.warn("Register [{}] fail: {}, will try again...", meta.getServiceMeta(), stackTrace(t));
-                            //}
+                            if (logger.IsEnabled(LogLevel.Warning))
+                            {
+                                logger.LogWarning($"Register [{meta.getServiceMeta()}] fail: { e}, will try again...");
+                            }
 
                             queue.Add(meta);
                         }
@@ -60,26 +71,17 @@ namespace Meou.Registry.Abstractions
 
         public void shutdownGracefully()
         {
-            //Interlocked.CompareExchange<bool>(ref shutdown, true, false);
-            //if (!shutdown.getAndSet(true))
-            //{
-            //    executor.shutdown();
-            //    try
-            //    {
-            //        destroy();
-            //    }
-            //    catch (Exception ignored) { }
-            //}
-
+            //Interlocked.CompareExchange(ref shutdown, true, false);
+            if (!shutdown)
+            {
+                destroy();
+            }
             shutdown = true;
         }
 
         public virtual Collection<RegisterMeta> lookup(RegisterMeta.ServiceMeta serviceMeta)
         {
             KeyValuePair<long, List<RegisterMeta>> data;
-
-            //final Lock readLock = registriesLock.readLock();
-            //readLock.lock () ;
 
             registries.TryGetValue(serviceMeta, out data);
 
@@ -96,28 +98,27 @@ namespace Meou.Registry.Abstractions
         }
 
         public void unregister(RegisterMeta meta)
-        {
-            //if (!queue.TryTake(item))
+        {            
+            //if (!queue.(item))
             //{
             //    doUnregister(meta);
             //}
-
             doUnregister(meta);
         }
 
         public void subscribe(ServiceMeta serviceMeta, NotifyListener listener)
         {
-            List<NotifyListener> listeners;
+            BlockingCollection<NotifyListener> listeners;
             subscribeListeners.TryGetValue(serviceMeta, out listeners);
 
             if (listeners == null)
             {
-                List<NotifyListener> newListeners = new List<NotifyListener>();
+                BlockingCollection<NotifyListener> newListeners = new BlockingCollection<NotifyListener>();
                 subscribeListeners.TryAdd(serviceMeta, newListeners);
-                //if (listeners == null)
-                //{
-                //    listeners = newListeners;
-                //}
+                if (listeners == null)
+                {
+                    listeners = newListeners;
+                }
             }
             listeners.Add(listener);
 
@@ -176,7 +177,7 @@ namespace Meou.Registry.Abstractions
 
             if (notifyNeeded)
             {
-                List<NotifyListener> listeners;
+                BlockingCollection<NotifyListener> listeners;
                 subscribeListeners.TryGetValue(serviceMeta, out listeners);
                 if (listeners != null)
                 {
@@ -191,9 +192,39 @@ namespace Meou.Registry.Abstractions
             }
         }
 
+        public void offlineListening(RegisterMeta.Address address, OfflineListener listener)
+        {
+            BlockingCollection<OfflineListener> listeners;
+            offlineListeners.TryGetValue(address,out listeners);
+            if (listeners == null)
+            {
+                BlockingCollection<OfflineListener> newListeners = new BlockingCollection<OfflineListener>();
+                offlineListeners.TryAdd(address, newListeners);
+
+                if (listeners == null)
+                {
+                    listeners = newListeners;
+                }
+            }
+            listeners.TryAdd(listener);
+        }
+        public void offline(RegisterMeta.Address address)
+        {
+            // remove & notify
+            BlockingCollection<OfflineListener> listeners;
+            offlineListeners.TryGetValue(address,out listeners);
+            if (listeners != null)
+            {
+                foreach (OfflineListener item in  listeners)
+                {
+                    item.Offline();
+                }
+            }
+        }
+
         protected abstract void doRegister(RegisterMeta meta);
         protected abstract void doSubscribe(RegisterMeta.ServiceMeta serviceMeta);
-
         protected abstract void doUnregister(RegisterMeta meta);
+        public abstract void destroy();
     }
 }
