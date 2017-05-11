@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ZooKeeperNetEx" Version="3.4.9.4" />
+    <PackageReference Include="ZooKeeperNetEx.Recipes" Version="3.4.9.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Meou.Registry.Abstractions\Meou.Registry.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

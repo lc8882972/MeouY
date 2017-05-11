@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Registry", "Registry", "{B6C84716-38CC-4C88-BEB1-430A2F6876D3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meou.Registry.Abstractions", "src\Meou.Registry.Abstractions\Meou.Registry.Abstractions.csproj", "{13349036-985D-4055-AD89-0A63C8AC23CF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meou.Registry.Zookeeper", "src\Meou.Registry.Zookeeper\Meou.Registry.Zookeeper.csproj", "{0B1FD54B-DACB-4789-A580-A447FE60DE7C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{13349036-985D-4055-AD89-0A63C8AC23CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13349036-985D-4055-AD89-0A63C8AC23CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13349036-985D-4055-AD89-0A63C8AC23CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13349036-985D-4055-AD89-0A63C8AC23CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B1FD54B-DACB-4789-A580-A447FE60DE7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B1FD54B-DACB-4789-A580-A447FE60DE7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B1FD54B-DACB-4789-A580-A447FE60DE7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B1FD54B-DACB-4789-A580-A447FE60DE7C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{13349036-985D-4055-AD89-0A63C8AC23CF} = {B6C84716-38CC-4C88-BEB1-430A2F6876D3}
+		{0B1FD54B-DACB-4789-A580-A447FE60DE7C} = {B6C84716-38CC-4C88-BEB1-430A2F6876D3}
+	EndGlobalSection
+EndGlobal
