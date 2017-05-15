@@ -15,7 +15,13 @@ namespace Meou.Registry.Zookeeper
         {
 
         }
-        private readonly string address = "127.0.0.1:2181";
+
+        public ZookeeperRegistryService(string connectString, ILoggerFactory loggerFactory) : base(loggerFactory)
+        {
+            address = connectString;
+        }
+
+        private string address = "127.0.0.1:2181";
         private int sessionTimeoutMs = 60 * 1000;
         private int connectionTimeoutMs = 15 * 1000;
         //private  ConcurrentMap<RegisterMeta.ServiceMeta, PathChildrenCache> pathChildrenCaches = Maps.newConcurrentMap();
@@ -88,7 +94,9 @@ namespace Meou.Registry.Zookeeper
 
         protected override void doSubscribe(RegisterMeta.ServiceMeta serviceMeta)
         {
-            throw new NotImplementedException();
+            string directory = $"/jupiter/provider/{serviceMeta.getGroup()}/{serviceMeta.getServiceProviderName()}/{serviceMeta.getVersion()}";
+           
+            configClient.getChildrenAsync(directory, new ChildWatcher());
         }
 
         protected override void doUnregister(RegisterMeta meta)
