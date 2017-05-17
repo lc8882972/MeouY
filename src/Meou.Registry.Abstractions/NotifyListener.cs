@@ -8,7 +8,7 @@ namespace Meou.Registry.Abstractions
 {
     public interface NotifyListener
     {
-        void Notify(RegisterMeta registerMeta, NotifyEvent @event);
+        Task Notify(RegisterMeta registerMeta);
     }
 }
 

@@ -189,9 +189,9 @@ namespace Meou.Registry.Abstractions
             }
         }
 
-        /**
-         * 不要轻易修改成员变量, 否则将影响hashCode和equals, ServiceMeta需要经常放入List, Map等容器中.
-         */
+        /// <summary>
+        /// 服务信息
+        /// </summary>
         public class ServiceMeta
         {
             // 组别

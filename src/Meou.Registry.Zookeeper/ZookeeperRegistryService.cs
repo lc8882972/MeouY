@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Collections.Concurrent;
 using Meou.Registry.Abstractions;
-using org.apache.zookeeper;
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
+using ZooKeeperClient.Client;
+using ZooKeeperClient.Listener;
+using System.Threading.Tasks;
 
 namespace Meou.Registry.Zookeeper
 {
@@ -22,15 +24,19 @@ namespace Meou.Registry.Zookeeper
         }
 
         private string address = "127.0.0.1:2181";
-        private int sessionTimeoutMs = 60 * 1000;
-        private int connectionTimeoutMs = 15 * 1000;
+        private int sessionTimeout = 60 * 1000;
+        private int connectionTimeout = 15 * 1000;
         //private  ConcurrentMap<RegisterMeta.ServiceMeta, PathChildrenCache> pathChildrenCaches = Maps.newConcurrentMap();
         private ConcurrentDictionary<RegisterMeta.Address, HashSet<RegisterMeta.ServiceMeta>> serviceMetaMap = new ConcurrentDictionary<RegisterMeta.Address, HashSet<RegisterMeta.ServiceMeta>>();
-        private ZooKeeper configClient;
+        private ZKClient configClient;
 
         public override void connectToRegistryServer(String connectString)
         {
-            configClient = new ZooKeeper(connectString, sessionTimeoutMs, null);
+            string address = "localhost:2181";
+            configClient = ZKClientBuilder.NewZKClient(address)
+                                       .SessionTimeout(sessionTimeout)//可选  
+                                       .ConnectionTimeout(connectionTimeout)//可选  
+                                       .Build(); //创建实例
         }
 
         public override Collection<RegisterMeta> lookup(RegisterMeta.ServiceMeta serviceMeta)
@@ -39,9 +45,9 @@ namespace Meou.Registry.Zookeeper
             List<RegisterMeta> registerMetaList = new List<RegisterMeta>();
             try
             {
-                var children = configClient.getChildrenAsync(directory, false).ConfigureAwait(false).GetAwaiter().GetResult();
-                List<String> paths = children.Children;
-                foreach (string p in paths)
+                var children = configClient.GetChildrenAsync(directory).ConfigureAwait(false).GetAwaiter().GetResult();
+             
+                foreach (string p in children)
                 {
                     registerMetaList.Add(parseRegisterMeta($"{directory}/{p}"));
                 }
@@ -61,10 +67,10 @@ namespace Meou.Registry.Zookeeper
             string directory = $"/jupiter/provider/{meta.getGroup()}/{meta.getServiceProviderName()}/{meta.getVersion()}";
             try
             {
-                var result = configClient.existsAsync(directory).ConfigureAwait(false).GetAwaiter().GetResult();
-                if (result == null)
+                var result = configClient.ExistsAsync(directory).ConfigureAwait(false).GetAwaiter().GetResult();
+                if (result)
                 {
-                    configClient.createAsync(directory, System.Text.Encoding.UTF8.GetBytes(""), ZooDefs.Ids.CREATOR_ALL_ACL, CreateMode.EPHEMERAL).GetAwaiter().GetResult();
+                    configClient.CreateEphemeralAsync(directory, System.Text.Encoding.UTF8.GetBytes("")).GetAwaiter().GetResult();
                 }
             }
             catch (Exception e)
@@ -81,7 +87,7 @@ namespace Meou.Registry.Zookeeper
                 string tempPath = $"{directory}/{meta.getHost()}:{meta.getPort()}:{meta.getWeight()}:{meta.getConnCount()}";
 
                 // The znode will be deleted upon the client's disconnect.
-                configClient.createAsync(tempPath, System.Text.Encoding.UTF8.GetBytes(""), ZooDefs.Ids.CREATOR_ALL_ACL, CreateMode.EPHEMERAL);
+                configClient.CreateEphemeralAsync(tempPath, System.Text.Encoding.UTF8.GetBytes("")).Wait();
             }
             catch (Exception e)
             {
@@ -95,8 +101,13 @@ namespace Meou.Registry.Zookeeper
         protected override void doSubscribe(RegisterMeta.ServiceMeta serviceMeta)
         {
             string directory = $"/jupiter/provider/{serviceMeta.getGroup()}/{serviceMeta.getServiceProviderName()}/{serviceMeta.getVersion()}";
-           
-            configClient.getChildrenAsync(directory, new ChildWatcher());
+            IZKChildListener childListener = new ZKChildListener();
+            childListener.ChildChangeHandler = async (parentPath, currentChilds) =>
+            {
+                await notify(serviceMeta,NotifyEvent.CHILD_ADDED,1L,new List<RegisterMeta>());
+            };
+            configClient.SubscribeChildChanges(directory, childListener);
+
         }
 
         protected override void doUnregister(RegisterMeta meta)
@@ -105,8 +116,8 @@ namespace Meou.Registry.Zookeeper
 
             try
             {
-                var result = configClient.existsAsync(directory).ConfigureAwait(false).GetAwaiter().GetResult();
-                if (result == null)
+                var result = configClient.ExistsAsync(directory).ConfigureAwait(false).GetAwaiter().GetResult();
+                if (result)
                 {
                     return;
                 }
@@ -125,7 +136,7 @@ namespace Meou.Registry.Zookeeper
                 string tempPath = $"{directory}/{meta.getHost()}:{meta.getPort()}:{meta.getWeight()}:{meta.getConnCount()}";
 
                 // The znode will be deleted upon the client's disconnect.
-                configClient.deleteAsync(tempPath).ConfigureAwait(false).GetAwaiter().GetResult();
+                configClient.DeleteAsync(tempPath).ConfigureAwait(false).GetAwaiter().GetResult();
             }
             catch (Exception e)
             {
@@ -155,7 +166,7 @@ namespace Meou.Registry.Zookeeper
 
         public override void destroy()
         {
-            configClient.closeAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            configClient.Close();
         }
     }
 }

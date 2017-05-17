@@ -125,18 +125,16 @@ namespace Meou.Registry.Abstractions
             doSubscribe(serviceMeta);
         }
 
-        protected void notify(
+        protected Task notify(
             ServiceMeta serviceMeta, NotifyEvent @event, long version, List<RegisterMeta> array)
         {
 
             if (array == null || array.Count == 0)
             {
-                return;
+                return Task.FromResult<object>(null);
             }
 
             bool notifyNeeded = false;
-
-
             KeyValuePair<long, List<RegisterMeta>> data;
             registries.TryGetValue(serviceMeta, out data);
 
@@ -144,12 +142,13 @@ namespace Meou.Registry.Abstractions
             {
                 if (@event == NotifyEvent.CHILD_REMOVED)
                 {
-                    return;
+                    return Task.FromResult<object>(null); ;
                 }
 
                 List<RegisterMeta> metaList = new List<RegisterMeta>(array);
                 data = new KeyValuePair<long, List<RegisterMeta>>(version, metaList);
                 notifyNeeded = true;
+
             }
             else
             {
@@ -185,11 +184,13 @@ namespace Meou.Registry.Abstractions
                     {
                         foreach (RegisterMeta m in array)
                         {
-                            item.Notify(m, @event);
+                            item.Notify(m);
                         }
                     }
                 }
             }
+
+            return Task.FromResult<object>(null);
         }
 
         public void offlineListening(RegisterMeta.Address address, OfflineListener listener)

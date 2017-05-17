@@ -1,13 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Registry", "Registry", "{B6C84716-38CC-4C88-BEB1-430A2F6876D3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meou.Registry.Abstractions", "src\Meou.Registry.Abstractions\Meou.Registry.Abstractions.csproj", "{13349036-985D-4055-AD89-0A63C8AC23CF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meou.Registry.Zookeeper", "src\Meou.Registry.Zookeeper\Meou.Registry.Zookeeper.csproj", "{0B1FD54B-DACB-4789-A580-A447FE60DE7C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Router", "Router", "{50FD6BE0-07E5-45E6-8313-E191FC45CB35}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LoadBalance", "LoadBalance", "{01ACAFD0-78D9-4F47-9A59-D7A9E16848A5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RPC", "RPC", "{C2D612D2-8A8D-4D4F-94CC-F57E8910D84C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{1C6A5AD7-631B-4548-A62C-0C28C4EED7C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZookeeperConsoleApp", "src\ZookeeperConsoleApp\ZookeeperConsoleApp.csproj", "{A4B1117E-528C-427B-A4B9-F1B3A0F44188}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZookeeperClientCore", "src\ZookeeperClientCore\ZookeeperClientCore.csproj", "{48578185-61ED-4B40-AED1-A7DC1E83D235}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +35,14 @@ Global
 		{0B1FD54B-DACB-4789-A580-A447FE60DE7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B1FD54B-DACB-4789-A580-A447FE60DE7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B1FD54B-DACB-4789-A580-A447FE60DE7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4B1117E-528C-427B-A4B9-F1B3A0F44188}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4B1117E-528C-427B-A4B9-F1B3A0F44188}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4B1117E-528C-427B-A4B9-F1B3A0F44188}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4B1117E-528C-427B-A4B9-F1B3A0F44188}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48578185-61ED-4B40-AED1-A7DC1E83D235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48578185-61ED-4B40-AED1-A7DC1E83D235}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48578185-61ED-4B40-AED1-A7DC1E83D235}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48578185-61ED-4B40-AED1-A7DC1E83D235}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -30,5 +50,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{13349036-985D-4055-AD89-0A63C8AC23CF} = {B6C84716-38CC-4C88-BEB1-430A2F6876D3}
 		{0B1FD54B-DACB-4789-A580-A447FE60DE7C} = {B6C84716-38CC-4C88-BEB1-430A2F6876D3}
+		{A4B1117E-528C-427B-A4B9-F1B3A0F44188} = {1C6A5AD7-631B-4548-A62C-0C28C4EED7C5}
+		{48578185-61ED-4B40-AED1-A7DC1E83D235} = {B6C84716-38CC-4C88-BEB1-430A2F6876D3}
 	EndGlobalSection
 EndGlobal

@@ -6,12 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.2" />
-    <PackageReference Include="ZooKeeperNetEx" Version="3.4.9.4" />
-    <PackageReference Include="ZooKeeperNetEx.Recipes" Version="3.4.9.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Meou.Registry.Abstractions\Meou.Registry.Abstractions.csproj" />
+    <ProjectReference Include="..\ZookeeperClientCore\ZookeeperClientCore.csproj" />
   </ItemGroup>
 
 </Project>
