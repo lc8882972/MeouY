@@ -32,8 +32,7 @@ namespace Meou.Registry.Zookeeper
 
         public override void connectToRegistryServer(String connectString)
         {
-            string address = "localhost:2181";
-            configClient = ZKClientBuilder.NewZKClient(address)
+            configClient = ZKClientBuilder.NewZKClient(connectString)
                                        .SessionTimeout(sessionTimeout)//可选  
                                        .ConnectionTimeout(connectionTimeout)//可选  
                                        .Build(); //创建实例
