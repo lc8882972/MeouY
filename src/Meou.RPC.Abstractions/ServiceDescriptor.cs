@@ -73,6 +73,10 @@ namespace Rabbit.Rpc
         /// </summary>
         public string Id { get; set; }
         /// <summary>
+        /// 服务
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
         /// 服务组
         /// </summary>
         public string Group { get; set; }

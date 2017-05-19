@@ -48,5 +48,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Meou.Registry.Abstractions\Meou.Registry.Abstractions.csproj" />
+    <ProjectReference Include="..\Meou.Registry.Zookeeper\Meou.Registry.Zookeeper.csproj" />
   </ItemGroup>
 </Project>

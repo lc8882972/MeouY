@@ -60,14 +60,16 @@ namespace Meou.RPC.Abstractions.Routing.Implementation
                 meta = new RegisterMeta();
                 foreach (var addr in item.AddressDescriptors)
                 {
-                    meta.setServiceProviderName(item.ServiceDescriptor.Id);
-                    meta.setVersion("0.0.0");
-                    meta.setGroup("test");
-                    
+                    meta.setServiceProviderName(item.ServiceDescriptor.Name);
+                    meta.setGroup(item.ServiceDescriptor.Group);
+                    meta.setVersion(item.ServiceDescriptor.Version);
+                    //_registryService.subscribe(meta, new RouteNotifyListener());
                     _registryService.register(meta);
                 }
 
             }
+
+            return Task.CompletedTask;
         }
 
         private ServiceRoute RegisterMetaPareRoute(RegisterMeta meta)

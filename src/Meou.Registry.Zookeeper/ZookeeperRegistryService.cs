@@ -22,7 +22,7 @@ namespace Meou.Registry.Zookeeper
         {
             address = connectString;
         }
-
+        private string serviceAddr = "127.0.0.1:8022";
         private string address = "127.0.0.1:2181";
         private int sessionTimeout = 60 * 1000;
         private int connectionTimeout = 15 * 1000;
@@ -67,10 +67,12 @@ namespace Meou.Registry.Zookeeper
             try
             {
                 var result = configClient.ExistsAsync(directory).ConfigureAwait(false).GetAwaiter().GetResult();
-                if (result)
+                if (!result)
                 {
-                    configClient.CreateEphemeralAsync(directory, System.Text.Encoding.UTF8.GetBytes("")).GetAwaiter().GetResult();
+                    configClient.CreateRecursiveAsync(directory, null, org.apache.zookeeper.CreateMode.EPHEMERAL).ConfigureAwait(false).GetAwaiter().GetResult();
                 }
+
+                //configClient.CreateEphemeralAsync(directory, System.Text.Encoding.UTF8.GetBytes("")).GetAwaiter().GetResult();
             }
             catch (Exception e)
             {
@@ -82,7 +84,8 @@ namespace Meou.Registry.Zookeeper
 
             try
             {
-                meta.setHost(address);
+                meta.setAddress(RegisterMeta.Address.Parse(serviceAddr));
+
                 string tempPath = $"{directory}/{meta.getHost()}:{meta.getPort()}:{meta.getWeight()}:{meta.getConnCount()}";
 
                 // The znode will be deleted upon the client's disconnect.

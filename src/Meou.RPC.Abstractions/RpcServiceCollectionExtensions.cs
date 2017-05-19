@@ -25,6 +25,8 @@ using Rabbit.Rpc.Transport.Codec;
 using Rabbit.Rpc.Transport.Codec.Implementation;
 using System;
 using System.Linq;
+using Meou.RPC.Abstractions.Routing.Implementation;
+using Meou.Registry.Zookeeper;
 
 #if !NET
 
@@ -140,6 +142,22 @@ namespace Rabbit.Rpc
                 provider.GetRequiredService<ISerializer<string>>(),
                 provider.GetRequiredService<IServiceRouteFactory>(),
                 provider.GetRequiredService<ILogger<SharedFileServiceRouteManager>>()));
+        }
+
+        /// <summary>
+        /// 设置注册中心路由管理。
+        /// </summary>
+        /// <param name="builder">Rpc服务构建者。</param>
+        /// <param name="filePath">文件路径。</param>
+        /// <returns>Rpc服务构建者。</returns>
+        public static IRpcBuilder UseRegistryRouteManager(this IRpcBuilder builder, string connString)
+        {
+            return builder.UseRouteManager(provider =>
+            new RegistryServiceRouteManager(
+                new ZookeeperRegistryServiceBuilder(connString),
+                provider.GetRequiredService<ISerializer<string>>(),
+                provider.GetRequiredService<IServiceRouteFactory>(),
+                provider.GetRequiredService<ILogger<RegistryServiceRouteManager>>()));
         }
 
         #region AddressSelector

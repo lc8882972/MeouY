@@ -67,6 +67,11 @@ namespace Meou.Registry.Abstractions
             serviceMeta.setVersion(version);
         }
 
+        public Address setAddress(Address addr)
+        {
+            return address = addr;
+        }
+
         public Address getAddress()
         {
             return address;
@@ -143,6 +148,15 @@ namespace Meou.Registry.Abstractions
                 this.port = port;
             }
 
+            public static Address Parse(string host)
+            {
+                if (string.IsNullOrEmpty(host) && host.IndexOf(':') == -1)
+                    throw new System.ArgumentException("host:port 格式错误");
+
+                string[] array = host.Split(':');
+                Address temp = new Address(array[0],Convert.ToInt32(array[1]));
+                return temp;
+            }
             public String getHost()
             {
                 return host;

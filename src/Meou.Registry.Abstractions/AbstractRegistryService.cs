@@ -46,7 +46,7 @@ namespace Meou.Registry.Abstractions
                     try
                     {
                         queue.TryTake(out meta);
-                        doRegister(meta);
+                        //doRegister(meta);
                     }
                     catch (Exception e)
                     {
@@ -95,6 +95,7 @@ namespace Meou.Registry.Abstractions
         public void register(RegisterMeta meta)
         {
             queue.Add(meta);
+            doRegister(meta);
         }
 
         public void unregister(RegisterMeta meta)

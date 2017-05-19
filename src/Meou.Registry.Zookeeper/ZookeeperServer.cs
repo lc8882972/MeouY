@@ -8,9 +8,15 @@ namespace Meou.Registry.Zookeeper
 {
     public class ZookeeperServer
     {
+        NotifyListener _listener;
+        public ZookeeperServer(NotifyListener listener)
+        {
+            _listener = listener;
+        }
+        RegistryService _registry = new ZookeeperRegistryServiceBuilder("localhost:2181").Builder();
         public void Start()
         {
-            AssemblyPart tempPart = null;
+            //AssemblyPart tempPart = null;
             //var parts = DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(Assembly.GetEntryAssembly().FullName);
             //foreach (var item in parts)
             //{
@@ -42,7 +48,7 @@ namespace Meou.Registry.Zookeeper
 
                 foreach (var attr in typeInfo.CustomAttributes)
                 {
-                    if (attr.AttributeType.Name != "ServiceProvider")
+                    if (attr.AttributeType.Name != "ServiceProviderAttribute")
                         continue;
 
                     tempMeta = new RegisterMeta();
@@ -59,33 +65,49 @@ namespace Meou.Registry.Zookeeper
                         }
                     }
 
+                    tempMeta.setVersion("0.1.0");
+
                 }
 
-                foreach (var impl in typeInfo.ImplementedInterfaces)
-                {
-                    var ti = impl.GetTypeInfo();
+                //foreach (var impl in typeInfo.ImplementedInterfaces)
+                //{
+                //    var ti = impl.GetTypeInfo();
 
-                    foreach (var attr in typeInfo.CustomAttributes)
-                    {
-                        if (attr.AttributeType.Name != "ServiceProviderImpl")
-                            continue;
+                //    foreach (var attr in typeInfo.CustomAttributes)
+                //    {
+                //        if (attr.AttributeType.Name != "ServiceProviderImplAttribute")
+                //            continue;
 
-                        tempMeta = new RegisterMeta();
-                        foreach (var arg in attr.NamedArguments)
-                        {
-                            switch (arg.MemberName)
-                            {
-                                case "version":
-                                    tempMeta.getServiceMeta().setVersion(arg.TypedValue.Value.ToString());
-                                    break;
-                            }
-                        }
+                //        tempMeta = new RegisterMeta();
+                //        foreach (var arg in attr.NamedArguments)
+                //        {
+                //            switch (arg.MemberName)
+                //            {
+                //                case "version":
+                //                    tempMeta.getServiceMeta().setVersion(arg.TypedValue.Value.ToString());
+                //                    break;
+                //            }
+                //        }
 
-                    }
-                }
+                //    }
+                //}
 
                 meta.Add(tempMeta);
             }
+
+           
+            _registry.connectToRegistryServer("localhost: 2181");
+            foreach (var item in meta)
+            {
+                _registry.register(item);
+                _registry.subscribe(item.getServiceMeta(), _listener);
+            }
+        
+        }
+
+        public void Stop()
+        {
+            _registry.shutdownGracefully();
         }
     }
 }

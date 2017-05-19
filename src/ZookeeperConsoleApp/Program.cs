@@ -7,7 +7,7 @@ namespace ZookeeperConsoleApp
     {
         static void Main(string[] args)
         {
-            ZookeeperServer zs = new ZookeeperServer();
+            ZookeeperServer zs = new ZookeeperServer( new RouteNotifyListener());
             zs.Start();
 
             Console.ReadLine();
