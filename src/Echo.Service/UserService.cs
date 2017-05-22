@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Meou.Registry.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Echo.Service
 {
+    [ServiceProviderImpl(version ="0.0.0")]
     public class UserService : IUserService
     {
         #region Implementation of IUserService

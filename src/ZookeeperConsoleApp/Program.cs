@@ -11,6 +11,8 @@ namespace ZookeeperConsoleApp
             zs.Start();
 
             Console.ReadLine();
+
+            zs.Stop();
         }
     }
 }

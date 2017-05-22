@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.Service", "src\Echo.Se
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.Server", "src\Echo.Server\Echo.Server.csproj", "{6F30136B-ABDE-41E1-B714-5399D5999664}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meou.RPC.ProxyGenerator", "Meou.RPC.ProxyGenerator\Meou.RPC.ProxyGenerator.csproj", "{B7DD3CDE-CFB6-4FBA-A7E9-77D795966B25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{6F30136B-ABDE-41E1-B714-5399D5999664}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F30136B-ABDE-41E1-B714-5399D5999664}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F30136B-ABDE-41E1-B714-5399D5999664}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7DD3CDE-CFB6-4FBA-A7E9-77D795966B25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7DD3CDE-CFB6-4FBA-A7E9-77D795966B25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7DD3CDE-CFB6-4FBA-A7E9-77D795966B25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7DD3CDE-CFB6-4FBA-A7E9-77D795966B25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -101,5 +107,6 @@ Global
 		{E3D4827B-0FA9-4075-993E-F2D290ABE599} = {1C6A5AD7-631B-4548-A62C-0C28C4EED7C5}
 		{CC799443-7D5D-4403-A067-C51EE1394D14} = {1C6A5AD7-631B-4548-A62C-0C28C4EED7C5}
 		{6F30136B-ABDE-41E1-B714-5399D5999664} = {1C6A5AD7-631B-4548-A62C-0C28C4EED7C5}
+		{B7DD3CDE-CFB6-4FBA-A7E9-77D795966B25} = {C2D612D2-8A8D-4D4F-94CC-F57E8910D84C}
 	EndGlobalSection
 EndGlobal

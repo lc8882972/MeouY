@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
+using Meou.Registry.Abstractions;
 
 namespace Echo.Service
 {
@@ -14,6 +15,7 @@ namespace Echo.Service
     }
 
     [RpcServiceBundle]
+    [ServiceProvider(group = "TestGroup", name = "IUserService")]
     public interface IUserService
     {
         Task<string> GetUserName(int id);

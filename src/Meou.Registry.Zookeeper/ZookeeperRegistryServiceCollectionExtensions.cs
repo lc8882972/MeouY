@@ -1,10 +1,11 @@
 ﻿using Meou.Registry.Abstractions;
+using Meou.Registry.Zookeeper;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Meou.Registry.Zookeeper
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ZookeeperRegistryServiceCollectionExtensions
     {

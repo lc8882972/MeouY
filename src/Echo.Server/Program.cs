@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Rabbit.Transport.DotNetty;
+using Meou.Registry.Abstractions;
 
 namespace Echo.Server
 {
@@ -32,6 +33,8 @@ namespace Echo.Server
 
             serviceCollection
                 .AddLogging()
+                .AddServiceProvider()
+                .AddZookeeperRegistry("localhost:2181")
                 .AddRpcCore()
                 .AddServiceRuntime()
                 .UseRegistryRouteManager("localhost:2181")
@@ -40,19 +43,29 @@ namespace Echo.Server
             serviceCollection.AddTransient<IUserService, UserService>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
-
+            RegistryService registry = null;
             serviceProvider.GetRequiredService<ILoggerFactory>()
                 .AddConsole((c, l) => (int)l >= 3);
 
             //自动生成服务路由（这边的文件与Echo.Client为强制约束）
             {
+                var registerMetaDiscoveryProvider = serviceProvider.GetRequiredService<IRegisterMetaDiscoveryProvider>();
+
+                var metas = registerMetaDiscoveryProvider.Builder();
+
+                IRegistryServiceBuilder registryServiceBuilder = serviceProvider.GetRequiredService<IRegistryServiceBuilder>();
+                registry = registryServiceBuilder.Builder();
+
+                foreach (var meta in metas)
+                {
+                    meta.setHost("127.0.0.1");
+                    meta.setPort(9981);
+                    registry.register(meta);
+                } 
+
                 var serviceEntryManager = serviceProvider.GetRequiredService<IServiceEntryManager>();
                 var addressDescriptors = serviceEntryManager.GetEntries().Select(i => new ServiceRoute
                 {
-                    Address = new[]
-                    {
-                        new IpAddressModel { Ip = "127.0.0.1", Port = 9981 }
-                    },
                     ServiceDescriptor = i.Descriptor
                 });
 
@@ -68,7 +81,14 @@ namespace Echo.Server
                 await serviceHost.StartAsync(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9981));
                 Console.WriteLine($"服务端启动成功，{DateTime.Now}。");
             });
-            Console.ReadLine();
+            var key = Console.ReadKey();
+
+            while (key.KeyChar != 'c' && key.Modifiers != ConsoleModifiers.Control)
+            {
+                key = Console.ReadKey();
+            }
+
+            registry.shutdownGracefully();
         }
     }
 }

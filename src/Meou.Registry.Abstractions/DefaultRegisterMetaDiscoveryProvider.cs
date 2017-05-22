@@ -1,35 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using Meou.Registry.Abstractions;
 using System.Reflection;
+using System.Text;
 
-namespace Meou.Registry.Zookeeper
+namespace Meou.Registry.Abstractions
 {
-    public class ZookeeperServer
+    public class DefaultRegisterMetaDiscoveryProvider : IRegisterMetaDiscoveryProvider
     {
-        NotifyListener _listener;
-        public ZookeeperServer(NotifyListener listener)
+        public IList<RegisterMeta> Builder()
         {
-            _listener = listener;
-        }
-        RegistryService _registry = new ZookeeperRegistryServiceBuilder("localhost:2181").Builder();
-        public void Start()
-        {
-            var list = DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(Assembly.GetEntryAssembly().FullName);
-
+            var parts = DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(Assembly.GetEntryAssembly().FullName);
             List<RegisterMeta> all = new List<RegisterMeta>();
-            foreach (var item in list)
+            foreach (var item in parts)
             {
                 all.AddRange(RegisterMetaFactory(item as AssemblyPart));
             }
-
-            foreach (var item in all)
-            {
-                Console.WriteLine(item.ToString());
-            }
-
-            Console.ReadLine();
+            return all;
         }
 
         private IList<RegisterMeta> RegisterMetaFactory(AssemblyPart part)
@@ -88,11 +74,6 @@ namespace Meou.Registry.Zookeeper
             }
 
             return meta;
-        }
-
-        public void Stop()
-        {
-            _registry.shutdownGracefully();
         }
     }
 }

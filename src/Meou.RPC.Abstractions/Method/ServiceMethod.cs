@@ -1,13 +1,14 @@
-﻿using Rabbit.Rpc.Address;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 
-namespace Rabbit.Rpc.Routing
+namespace Meou.RPC.Abstractions.Method
 {
     /// <summary>
     /// 服务路由。
     /// </summary>
-    public class ServiceRoute
+    public class ServiceMethod
     {
         /// <summary>
         /// 服务描述符。
@@ -21,14 +22,14 @@ namespace Rabbit.Rpc.Routing
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            var model = obj as ServiceRoute;
+            var model = obj as ServiceMethod;
             if (model == null)
                 return false;
 
             if (obj.GetType() != GetType())
                 return false;
 
-            return model.ServiceDescriptor == ServiceDescriptor;           
+            return model.ServiceDescriptor != ServiceDescriptor;
         }
 
         /// <summary>Serves as the default hash function. </summary>
@@ -38,12 +39,12 @@ namespace Rabbit.Rpc.Routing
             return ToString().GetHashCode();
         }
 
-        public static bool operator ==(ServiceRoute model1, ServiceRoute model2)
+        public static bool operator ==(ServiceMethod model1, ServiceMethod model2)
         {
             return Equals(model1, model2);
         }
 
-        public static bool operator !=(ServiceRoute model1, ServiceRoute model2)
+        public static bool operator !=(ServiceMethod model1, ServiceMethod model2)
         {
             return !Equals(model1, model2);
         }

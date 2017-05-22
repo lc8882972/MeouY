@@ -12,7 +12,9 @@ namespace Meou.Registry.Abstractions
     {
         internal static HashSet<string> ReferenceAssemblies { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-
+            "Meou.Registry.Abstractions",
+            "Meou.Registry.Zookeeper",
+            "ZookeeperClientCore"
         };
 
         public static IEnumerable<ApplicationPart> DiscoverAssemblyParts(string entryPointAssemblyName)
@@ -31,9 +33,11 @@ namespace Meou.Registry.Abstractions
                 return new[] { entryAssembly };
             }
 
-            return GetCandidateLibraries(dependencyContext)
-                .SelectMany(library => library.GetDefaultAssemblyNames(dependencyContext))
+            var r = GetCandidateLibraries(dependencyContext);
+            return   r.SelectMany(library => library.GetDefaultAssemblyNames(dependencyContext))
                 .Select(Assembly.Load);
+
+
         }
 
         // Returns a list of libraries that references the assemblies in <see cref="ReferenceAssemblies"/>.

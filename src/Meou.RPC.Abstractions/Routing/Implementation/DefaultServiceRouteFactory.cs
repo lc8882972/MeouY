@@ -35,7 +35,7 @@ namespace Rabbit.Rpc.Routing.Implementation
             var routes = new List<ServiceRoute>(descriptors.Count());
             routes.AddRange(descriptors.Select(descriptor => new ServiceRoute
             {
-                Address = CreateAddress(descriptor.AddressDescriptors),
+                //Address = CreateAddress(descriptor.AddressDescriptors),
                 ServiceDescriptor = descriptor.ServiceDescriptor
             }));
 

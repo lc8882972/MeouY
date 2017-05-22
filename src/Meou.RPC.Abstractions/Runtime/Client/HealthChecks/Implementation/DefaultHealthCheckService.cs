@@ -27,21 +27,21 @@ namespace Rabbit.Rpc.Runtime.Client.HealthChecks.Implementation
             }, null, timeSpan, timeSpan);
 
             //去除监控。
-            serviceRouteManager.Removed += (s, e) =>
-            {
-                Remove(e.Route.Address);
-            };
+            //serviceRouteManager.Removed += (s, e) =>
+            //{
+            //    Remove(e.Route.Address);
+            //};
             //重新监控。
             serviceRouteManager.Created += (s, e) =>
             {
-                var keys = e.Route.Address.Select(i => i.ToString());
-                Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value));
+                //var keys = e.Route.Address.Select(i => i.ToString());
+                //Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value));
             };
             //重新监控。
             serviceRouteManager.Changed += (s, e) =>
             {
-                var keys = e.Route.Address.Select(i => i.ToString());
-                Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value));
+                //var keys = e.Route.Address.Select(i => i.ToString());
+                //Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value));
             };
         }
 

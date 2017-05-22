@@ -84,7 +84,7 @@ namespace Meou.Registry.Zookeeper
 
             try
             {
-                meta.setAddress(RegisterMeta.Address.Parse(serviceAddr));
+                //meta.setAddress(RegisterMeta.Address.Parse(serviceAddr));
 
                 string tempPath = $"{directory}/{meta.getHost()}:{meta.getPort()}:{meta.getWeight()}:{meta.getConnCount()}";
 
@@ -106,8 +106,21 @@ namespace Meou.Registry.Zookeeper
             IZKChildListener childListener = new ZKChildListener();
             childListener.ChildChangeHandler = async (parentPath, currentChilds) =>
             {
-                await notify(serviceMeta,NotifyEvent.CHILD_ADDED,1L,new List<RegisterMeta>());
+                var list = new List<RegisterMeta>(currentChilds.Count);
+                RegisterMeta temp =null;
+                foreach (var child in currentChilds)
+                {
+                    temp = parseRegisterMeta($"{parentPath}/{child}");
+                    list.Add(temp);
+                }
+      
+                await notify(serviceMeta,NotifyEvent.CHILD_ADDED,1L,list);
             };
+
+            //childListener.ChildCountChangedHandler = async (parentPath, currentChilds) =>
+            //{
+            //    await notify(serviceMeta, NotifyEvent.CHILD_ADDED, 1L, new List<RegisterMeta>());
+            //};
             configClient.SubscribeChildChanges(directory, childListener);
 
         }
@@ -153,11 +166,11 @@ namespace Meou.Registry.Zookeeper
         {
             String[] array_0 = data.Split('/');
             RegisterMeta meta = new RegisterMeta();
-            meta.setGroup(array_0[2]);
-            meta.setServiceProviderName(array_0[3]);
-            meta.setVersion(array_0[4]);
+            meta.setGroup(array_0[3]);
+            meta.setServiceProviderName(array_0[4]);
+            meta.setVersion(array_0[5]);
 
-            String[] array_1 = array_0[5].Split(':');
+            String[] array_1 = array_0[6].Split(':');
             meta.setHost(array_1[0]);
             meta.setPort(Convert.ToInt32(array_1[1]));
             meta.setWeight(Convert.ToInt32(array_1[2]));

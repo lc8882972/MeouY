@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Meou.Registry.Abstractions\Meou.Registry.Abstractions.csproj" />
     <ProjectReference Include="..\Meou.RPC.Abstractions\Meou.RPC.Abstractions.csproj" />
     <ProjectReference Include="..\Meou.Transport.DotNetty\Meou.Transport.DotNetty.csproj" />
   </ItemGroup>

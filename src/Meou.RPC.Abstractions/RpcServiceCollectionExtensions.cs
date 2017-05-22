@@ -26,7 +26,7 @@ using Rabbit.Rpc.Transport.Codec.Implementation;
 using System;
 using System.Linq;
 using Meou.RPC.Abstractions.Routing.Implementation;
-using Meou.Registry.Zookeeper;
+using Meou.Registry.Abstractions;
 
 #if !NET
 
@@ -154,7 +154,7 @@ namespace Rabbit.Rpc
         {
             return builder.UseRouteManager(provider =>
             new RegistryServiceRouteManager(
-                new ZookeeperRegistryServiceBuilder(connString),
+                provider.GetRequiredService<IRegistryServiceBuilder>(),
                 provider.GetRequiredService<ISerializer<string>>(),
                 provider.GetRequiredService<IServiceRouteFactory>(),
                 provider.GetRequiredService<ILogger<RegistryServiceRouteManager>>()));

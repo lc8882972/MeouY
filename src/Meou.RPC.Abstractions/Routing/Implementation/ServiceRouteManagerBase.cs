@@ -100,11 +100,11 @@ namespace Rabbit.Rpc.Routing.Implementation
 
             var descriptors = routes.Where(route => route != null).Select(route => new ServiceRouteDescriptor
             {
-                AddressDescriptors = route.Address?.Select(address => new ServiceAddressDescriptor
-                {
-                    Type = address.GetType().FullName,
-                    Value = _serializer.Serialize(address)
-                }) ?? Enumerable.Empty<ServiceAddressDescriptor>(),
+                //AddressDescriptors = route.Address?.Select(address => new ServiceAddressDescriptor
+                //{
+                //    Type = address.GetType().FullName,
+                //    Value = _serializer.Serialize(address)
+                //}) ?? Enumerable.Empty<ServiceAddressDescriptor>(),
                 ServiceDescriptor = route.ServiceDescriptor
             });
 

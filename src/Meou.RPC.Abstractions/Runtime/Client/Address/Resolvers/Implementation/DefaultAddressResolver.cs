@@ -57,14 +57,14 @@ namespace Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation
             }
 
             var address = new List<AddressModel>();
-            foreach (var addressModel in descriptor.Address)
-            {
-                await _healthCheckService.Monitor(addressModel);
-                if (!await _healthCheckService.IsHealth(addressModel))
-                    continue;
+            //foreach (var addressModel in descriptor.Address)
+            //{
+            //    await _healthCheckService.Monitor(addressModel);
+            //    if (!await _healthCheckService.IsHealth(addressModel))
+            //        continue;
 
-                address.Add(addressModel);
-            }
+            //    address.Add(addressModel);
+            //}
 
             var hasAddress = address.Any();
             if (!hasAddress)
