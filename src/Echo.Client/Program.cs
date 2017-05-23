@@ -22,8 +22,10 @@ namespace Echo.Client
 
             serviceCollection
                 .AddLogging()
+                .AddServiceConsumer()
+                .AddZookeeperRegistry("localhosts:2181")
                 .AddClient()
-                .UseSharedFileRouteManager(@"d:\routes.txt")
+                .UseRegistryRouteManager("localhosts:2181")
                 .UseDotNettyTransport();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -46,16 +48,16 @@ namespace Echo.Client
                     try
                     {
                         Console.WriteLine($"userService.GetUserName:{await userService.GetUserName(1)}");
-                        Console.WriteLine($"userService.GetUserId:{await userService.GetUserId("rabbit")}");
-                        Console.WriteLine(
-                            $"userService.GetUserLastSignInTime:{await userService.GetUserLastSignInTime(1)}");
-                        Console.WriteLine($"userService.Exists:{await userService.Exists(1)}");
-                        var user = await userService.GetUser(1);
-                        Console.WriteLine($"userService.GetUser:name={user.Name},age={user.Age}");
-                        Console.WriteLine($"userService.Update:{await userService.Update(1, user)}");
-                        Console.WriteLine($"userService.GetDictionary:{(await userService.GetDictionary())["key"]}");
-                        await userService.Try();
-                        await userService.TryThrowException();
+                        //Console.WriteLine($"userService.GetUserId:{await userService.GetUserId("rabbit")}");
+                        //Console.WriteLine(
+                        //    $"userService.GetUserLastSignInTime:{await userService.GetUserLastSignInTime(1)}");
+                        //Console.WriteLine($"userService.Exists:{await userService.Exists(1)}");
+                        //var user = await userService.GetUser(1);
+                        //Console.WriteLine($"userService.GetUser:name={user.Name},age={user.Age}");
+                        //Console.WriteLine($"userService.Update:{await userService.Update(1, user)}");
+                        //Console.WriteLine($"userService.GetDictionary:{(await userService.GetDictionary())["key"]}");
+                        //await userService.Try();
+                        //await userService.TryThrowException();
                     }
                     catch (RpcRemoteException remoteException)
                     {

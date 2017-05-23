@@ -6,6 +6,6 @@ namespace Meou.Registry.Abstractions
 {
     public class ServiceProviderImplAttribute : Attribute
     {
-        public string version = string.Empty; 
+        public string version = "0.0.0"; 
     }
 }

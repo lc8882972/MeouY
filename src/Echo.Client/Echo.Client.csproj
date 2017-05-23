@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Meou.RPC.ProxyGenerator\Meou.RPC.ProxyGenerator.csproj" />
     <ProjectReference Include="..\Meou.Registry.Abstractions\Meou.Registry.Abstractions.csproj" />
     <ProjectReference Include="..\Meou.Registry.Zookeeper\Meou.Registry.Zookeeper.csproj" />
     <ProjectReference Include="..\Meou.RPC.Abstractions\Meou.RPC.Abstractions.csproj" />

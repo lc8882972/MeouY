@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Meou.Registry.Abstractions;
+using Microsoft.Extensions.Logging;
 using Rabbit.Rpc.Address;
 using Rabbit.Rpc.Routing;
 using Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation.Selectors;
@@ -15,7 +16,7 @@ namespace Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation
     public class DefaultAddressResolver : IAddressResolver
     {
         #region Field
-
+        private readonly IRegisterMetaDiscoveryProvider _serviceProvider;
         private readonly IServiceRouteManager _serviceRouteManager;
         private readonly ILogger<DefaultAddressResolver> _logger;
         private readonly IAddressSelector _addressSelector;
@@ -25,8 +26,9 @@ namespace Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation
 
         #region Constructor
 
-        public DefaultAddressResolver(IServiceRouteManager serviceRouteManager, ILogger<DefaultAddressResolver> logger, IAddressSelector addressSelector, IHealthCheckService healthCheckService)
+        public DefaultAddressResolver(IRegisterMetaDiscoveryProvider serviceProvider, IServiceRouteManager serviceRouteManager, ILogger<DefaultAddressResolver> logger, IAddressSelector addressSelector, IHealthCheckService healthCheckService)
         {
+            _serviceProvider = serviceProvider;
             _serviceRouteManager = serviceRouteManager;
             _logger = logger;
             _addressSelector = addressSelector;
