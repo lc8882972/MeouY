@@ -13,6 +13,14 @@ namespace Meou.Registry.Zookeeper
 {
     public class ZookeeperRegistryService : AbstractRegistryService
     {
+        private static int sequence = 0;
+        private string serviceAddr = "127.0.0.1:8022";
+        private string address = "127.0.0.1:2181";
+        private int sessionTimeout = 60 * 1000;
+        private int connectionTimeout = 15 * 1000;
+        private ConcurrentDictionary<RegisterMeta.Address, HashSet<RegisterMeta.ServiceMeta>> serviceMetaMap = new ConcurrentDictionary<RegisterMeta.Address, HashSet<RegisterMeta.ServiceMeta>>();
+        private ZKClient configClient;
+
         public ZookeeperRegistryService(ILoggerFactory loggerFactory) : base(loggerFactory)
         {
 
@@ -22,13 +30,6 @@ namespace Meou.Registry.Zookeeper
         {
             address = connectString;
         }
-        private string serviceAddr = "127.0.0.1:8022";
-        private string address = "127.0.0.1:2181";
-        private int sessionTimeout = 60 * 1000;
-        private int connectionTimeout = 15 * 1000;
-        //private  ConcurrentMap<RegisterMeta.ServiceMeta, PathChildrenCache> pathChildrenCaches = Maps.newConcurrentMap();
-        private ConcurrentDictionary<RegisterMeta.Address, HashSet<RegisterMeta.ServiceMeta>> serviceMetaMap = new ConcurrentDictionary<RegisterMeta.Address, HashSet<RegisterMeta.ServiceMeta>>();
-        private ZKClient configClient;
 
         public override void connectToRegistryServer(String connectString)
         {
@@ -40,7 +41,7 @@ namespace Meou.Registry.Zookeeper
 
         public override Collection<RegisterMeta> lookup(RegisterMeta.ServiceMeta serviceMeta)
         {
-            string directory = $"/jupiter/provider/{serviceMeta.getGroup()}/{serviceMeta.getVersion()}/{serviceMeta.getServiceProviderName()}";
+            string directory = $"/jupiter/provider/{serviceMeta.getGroup()}/{serviceMeta.getServiceProviderName()}/{serviceMeta.getVersion()}";
             List<RegisterMeta> registerMetaList = new List<RegisterMeta>();
             try
             {
@@ -69,10 +70,8 @@ namespace Meou.Registry.Zookeeper
                 var result = configClient.ExistsAsync(directory).ConfigureAwait(false).GetAwaiter().GetResult();
                 if (!result)
                 {
-                    configClient.CreateRecursiveAsync(directory, null, org.apache.zookeeper.CreateMode.EPHEMERAL).ConfigureAwait(false).GetAwaiter().GetResult();
+                    configClient.CreateRecursiveAsync(directory, null, org.apache.zookeeper.CreateMode.PERSISTENT).ConfigureAwait(false).GetAwaiter().GetResult();
                 }
-
-                //configClient.CreateEphemeralAsync(directory, System.Text.Encoding.UTF8.GetBytes("")).GetAwaiter().GetResult();
             }
             catch (Exception e)
             {
@@ -84,12 +83,10 @@ namespace Meou.Registry.Zookeeper
 
             try
             {
-                //meta.setAddress(RegisterMeta.Address.Parse(serviceAddr));
-
                 string tempPath = $"{directory}/{meta.getHost()}:{meta.getPort()}:{meta.getWeight()}:{meta.getConnCount()}";
 
                 // The znode will be deleted upon the client's disconnect.
-                configClient.CreateEphemeralAsync(tempPath, System.Text.Encoding.UTF8.GetBytes("")).Wait();
+                configClient.CreateEphemeralAsync(tempPath).Wait();
             }
             catch (Exception e)
             {
@@ -114,7 +111,7 @@ namespace Meou.Registry.Zookeeper
                     list.Add(temp);
                 }
       
-                await notify(serviceMeta,NotifyEvent.CHILD_ADDED,1L,list);
+                await notify(serviceMeta,NotifyEvent.CHILD_ADDED,sequence,list);
             };
 
             //childListener.ChildCountChangedHandler = async (parentPath, currentChilds) =>

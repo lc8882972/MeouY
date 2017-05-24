@@ -34,7 +34,7 @@ namespace Echo.Server
             serviceCollection
                 .AddLogging()
                 .AddServiceProvider()
-                .AddZookeeperRegistry("localhost:2181")
+                .AddZookeeperRegistry()
                 .AddRpcCore()
                 .AddServiceRuntime()
                 .UseRegistryRouteManager("localhost:2181")
@@ -55,7 +55,7 @@ namespace Echo.Server
 
                 IRegistryServiceBuilder registryServiceBuilder = serviceProvider.GetRequiredService<IRegistryServiceBuilder>();
                 registry = registryServiceBuilder.Builder();
-
+                registry.connectToRegistryServer("localhost:2181");
                 foreach (var meta in metas)
                 {
                     meta.setHost("127.0.0.1");

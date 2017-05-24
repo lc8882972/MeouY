@@ -13,12 +13,34 @@ namespace Meou.Registry.Abstractions
             List<RegisterMeta> all = new List<RegisterMeta>();
             foreach (var item in parts)
             {
-                all.AddRange(RegisterMetaFactory(item as AssemblyPart));
+                all.AddRange(ProviderRegisterMetaFactory(item as AssemblyPart));
             }
             return all;
         }
 
-        private IList<RegisterMeta> RegisterMetaFactory(AssemblyPart part)
+        public IList<RegisterMeta> Consumer()
+        {
+            var parts = DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(Assembly.GetEntryAssembly().FullName);
+            List<RegisterMeta> all = new List<RegisterMeta>();
+            foreach (var item in parts)
+            {
+                all.AddRange(ConsumerRegisterMetaFactory(item as AssemblyPart));
+            }
+            return all;
+        }
+
+        public IList<RegisterMeta> Provider()
+        {
+            var parts = DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(Assembly.GetEntryAssembly().FullName);
+            List<RegisterMeta> all = new List<RegisterMeta>();
+            foreach (var item in parts)
+            {
+                all.AddRange(ProviderRegisterMetaFactory(item as AssemblyPart));
+            }
+            return all;
+        }
+
+        private IList<RegisterMeta> ProviderRegisterMetaFactory(AssemblyPart part)
         {
             var types = part.Types;
 
@@ -63,6 +85,48 @@ namespace Meou.Registry.Abstractions
                     {
                         switch (arg.MemberName)
                         {
+                            case "version":
+                                tempMeta.setVersion(arg.TypedValue.Value.ToString());
+                                break;
+                        }
+                    }
+
+                    meta.Add(tempMeta);
+                }
+            }
+
+            return meta;
+        }
+
+        private IList<RegisterMeta> ConsumerRegisterMetaFactory(AssemblyPart part)
+        {
+            var types = part.Types;
+
+            List<RegisterMeta> meta = new List<RegisterMeta>();
+            RegisterMeta tempMeta = null;
+            foreach (var typeInfo in types)
+            {
+                if (!typeInfo.IsInterface || typeInfo.IsPrimitive)
+                    continue;
+
+                foreach (var attr in typeInfo.CustomAttributes)
+                {
+
+                    if (attr.AttributeType.Name != "ServiceConsumerAttribute")
+                        continue;
+
+                    tempMeta = new RegisterMeta();
+
+                    foreach (var arg in attr.NamedArguments)
+                    {
+                        switch (arg.MemberName)
+                        {
+                            case "name":
+                                tempMeta.setServiceProviderName(arg.TypedValue.Value.ToString());
+                                break;
+                            case "group":
+                                tempMeta.setGroup(arg.TypedValue.Value.ToString());
+                                break;
                             case "version":
                                 tempMeta.setVersion(arg.TypedValue.Value.ToString());
                                 break;

@@ -5,8 +5,11 @@ using Rabbit.Rpc.Routing;
 using Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation.Selectors;
 using Rabbit.Rpc.Runtime.Client.HealthChecks;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using Meou.Registry.Zookeeper;
 
 namespace Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation
 {
@@ -21,13 +24,16 @@ namespace Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation
         private readonly ILogger<DefaultAddressResolver> _logger;
         private readonly IAddressSelector _addressSelector;
         private readonly IHealthCheckService _healthCheckService;
-
+        private readonly RegistryService _registryService;
+        private ConcurrentDictionary<RegisterMeta.ServiceMeta, Collection<RegisterMeta>> _registerMetaList =new ConcurrentDictionary<RegisterMeta.ServiceMeta, Collection<RegisterMeta>>();
         #endregion Field
 
         #region Constructor
 
-        public DefaultAddressResolver(IRegisterMetaDiscoveryProvider serviceProvider, IServiceRouteManager serviceRouteManager, ILogger<DefaultAddressResolver> logger, IAddressSelector addressSelector, IHealthCheckService healthCheckService)
+        public DefaultAddressResolver(IRegistryServiceBuilder registryServiceBuilder, IRegisterMetaDiscoveryProvider serviceProvider, IServiceRouteManager serviceRouteManager, ILogger<DefaultAddressResolver> logger, IAddressSelector addressSelector, IHealthCheckService healthCheckService)
         {
+            _registryService = registryServiceBuilder.Builder();
+            _registryService.connectToRegistryServer("localhost:2181");
             _serviceProvider = serviceProvider;
             _serviceRouteManager = serviceRouteManager;
             _logger = logger;
@@ -48,25 +54,17 @@ namespace Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备为服务id：{serviceId}，解析可用地址。");
-            var descriptors = await _serviceRouteManager.GetRoutesAsync();
-            var descriptor = descriptors.FirstOrDefault(i => i.ServiceDescriptor.Id == serviceId);
+            //var descriptors = await _serviceRouteManager.GetRoutesAsync();
+            //var descriptor = descriptors.FirstOrDefault(i => i.ServiceDescriptor.Id == serviceId);
 
-            if (descriptor == null)
-            {
-                if (_logger.IsEnabled(LogLevel.Warning))
-                    _logger.LogWarning($"根据服务id：{serviceId}，找不到相关服务信息。");
-                return null;
-            }
-
-            var address = new List<AddressModel>();
-            //foreach (var addressModel in descriptor.Address)
+            //if (descriptor == null)
             //{
-            //    await _healthCheckService.Monitor(addressModel);
-            //    if (!await _healthCheckService.IsHealth(addressModel))
-            //        continue;
-
-            //    address.Add(addressModel);
+            //    if (_logger.IsEnabled(LogLevel.Warning))
+            //        _logger.LogWarning($"根据服务id：{serviceId}，找不到相关服务信息。");
+            //    return null;
             //}
+
+            var address = Parse(serviceId);
 
             var hasAddress = address.Any();
             if (!hasAddress)
@@ -81,11 +79,48 @@ namespace Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation
 
             return await _addressSelector.SelectAsync(new AddressSelectContext
             {
-                Descriptor = descriptor.ServiceDescriptor,
+                Descriptor = new ServiceDescriptor() {  Id = serviceId},
                 Address = address
             });
         }
 
+        private List<AddressModel> Parse(string serviceId)
+        {
+            var address = new List<AddressModel>();
+            string[] array = serviceId.Split('.');
+            Collection<RegisterMeta> registerMeta = null;
+            RegisterMeta.ServiceMeta temp = new RegisterMeta.ServiceMeta();
+            temp.setServiceProviderName(array[1]);
+            temp.setGroup(array[0]);
+            temp.setVersion("0.0.0");
+            if (!_registerMetaList.ContainsKey(temp)) {
+                registerMeta = _registryService.lookup(temp);
+                _registerMetaList.GetOrAdd(temp, registerMeta);
+            }else {
+                registerMeta = _registerMetaList[temp];
+            }
+            _registryService.subscribe(temp, new ZookeeperNotifyListener((meta) =>
+            {
+                if (!_registerMetaList.ContainsKey(meta.getServiceMeta()))
+                {
+                    _registerMetaList.GetOrAdd(temp, registerMeta);
+                }
+                else
+                {
+                    registerMeta = _registerMetaList[temp];
+                }
+            }));
+            foreach (var item in registerMeta)
+            {
+                address.Add(new IpAddressModel()
+                {
+                    Ip = item.getHost(),
+                    Port = item.getPort()
+                });
+            }
+
+            return address;
+        }
         #endregion Implementation of IAddressResolver
     }
 }

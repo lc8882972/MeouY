@@ -9,9 +9,9 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ZookeeperRegistryServiceCollectionExtensions
     {
-        public static IServiceCollection AddZookeeperRegistry(this IServiceCollection services,string connstr)
+        public static IServiceCollection AddZookeeperRegistry(this IServiceCollection services)
         {
-            services.AddSingleton<IRegistryServiceBuilder>(new ZookeeperRegistryServiceBuilder(connstr));
+            services.AddSingleton<IRegistryServiceBuilder, ZookeeperRegistryServiceBuilder>();
             return services;
         }
     }

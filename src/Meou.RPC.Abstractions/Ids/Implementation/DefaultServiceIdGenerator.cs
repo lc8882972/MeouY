@@ -32,7 +32,34 @@ namespace Rabbit.Rpc.Ids.Implementation
             if (type == null)
                 throw new ArgumentNullException(nameof(method.DeclaringType), "方法的定义类型不能为空。");
 
-            var id = $"{type.FullName}.{method.Name}";
+            var typeInfo = type.GetTypeInfo();
+           
+           
+            string group=null, name =null, version = null;
+            foreach (var attr in typeInfo.CustomAttributes)
+            {
+                if (attr.AttributeType.Name != "ServiceConsumerAttribute" && attr.AttributeType.Name != "ServiceProviderAttribute")
+                    continue;
+
+                foreach (var key in attr.NamedArguments)
+                {
+                    switch (key.MemberName)
+                    {
+                        case "group":
+                            group = key.TypedValue.Value as string;
+                            break;
+                        case "name":
+                            name = key.TypedValue.Value as string;
+                            break;
+                        case "version":
+                            version = key.TypedValue.Value as string;
+                            break;
+                    }
+                    
+                }
+            }
+            var id = $"{group}.{name}.{version}=>{method.Name}";
+
             var parameters = method.GetParameters();
             if (parameters.Any())
             {

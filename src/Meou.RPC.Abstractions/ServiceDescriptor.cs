@@ -72,18 +72,6 @@ namespace Rabbit.Rpc
         /// 服务Id。
         /// </summary>
         public string Id { get; set; }
-        /// <summary>
-        /// 服务
-        /// </summary>
-        public string Name { get; set; }
-        /// <summary>
-        /// 服务组
-        /// </summary>
-        public string Group { get; set; }
-        /// <summary>
-        /// 服务版本
-        /// </summary>
-        public string Version { get; set; } = "0.0.0";
 
         /// <summary>
         /// 元数据。

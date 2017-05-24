@@ -126,8 +126,7 @@ namespace Meou.Registry.Abstractions
             doSubscribe(serviceMeta);
         }
 
-        protected Task notify(
-            ServiceMeta serviceMeta, NotifyEvent @event, long version, List<RegisterMeta> array)
+        protected Task notify(ServiceMeta serviceMeta, NotifyEvent @event, long version, List<RegisterMeta> array)
         {
 
             if (array == null || array.Count == 0)
@@ -149,7 +148,6 @@ namespace Meou.Registry.Abstractions
                 List<RegisterMeta> metaList = new List<RegisterMeta>(array);
                 data = new KeyValuePair<long, List<RegisterMeta>>(version, metaList);
                 notifyNeeded = true;
-
             }
             else
             {

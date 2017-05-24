@@ -15,7 +15,7 @@ namespace Echo.Service
     }
 
     [RpcServiceBundle]
-    [ServiceProvider(group = "TestGroup", name = "IUserService")]
+    [ServiceProvider(group = "TestGroup", name = "IUserService" ,version ="0.0.0")]
     public interface IUserService
     {
         Task<string> GetUserName(int id);

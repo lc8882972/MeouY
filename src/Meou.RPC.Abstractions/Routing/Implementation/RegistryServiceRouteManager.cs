@@ -45,7 +45,10 @@ namespace Meou.RPC.Abstractions.Routing.Implementation
 
         public override Task<IEnumerable<ServiceRoute>> GetRoutesAsync()
         {
-            return Task.FromResult<IEnumerable<ServiceRoute>>(_routes);
+            List<ServiceRoute> routes = new List<ServiceRoute>();
+            routes.Add(new ServiceRoute() { ServiceDescriptor = new Rabbit.Rpc.ServiceDescriptor() { Id = "TestGroup.IUserService.0.0.0=>GetUserName_id" } });
+
+            return Task.FromResult<IEnumerable<ServiceRoute>>(routes);
         }
 
         protected override async Task SetRoutesAsync(IEnumerable<ServiceRouteDescriptor> routes)

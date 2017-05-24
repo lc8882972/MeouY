@@ -23,7 +23,7 @@ namespace Echo.Client
             serviceCollection
                 .AddLogging()
                 .AddServiceConsumer()
-                .AddZookeeperRegistry("localhosts:2181")
+                .AddZookeeperRegistry()
                 .AddClient()
                 .UseRegistryRouteManager("localhosts:2181")
                 .UseDotNettyTransport();

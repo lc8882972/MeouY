@@ -13,7 +13,7 @@ namespace Meou.Registry.Zookeeper
         {
             _listener = listener;
         }
-        RegistryService _registry = new ZookeeperRegistryServiceBuilder("localhost:2181").Builder();
+        RegistryService _registry = new ZookeeperRegistryServiceBuilder().Builder();
         public void Start()
         {
             var list = DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(Assembly.GetEntryAssembly().FullName);
