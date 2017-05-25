@@ -101,7 +101,7 @@ namespace Meou.Registry.Zookeeper
         {
             string directory = $"/jupiter/provider/{serviceMeta.getGroup()}/{serviceMeta.getServiceProviderName()}/{serviceMeta.getVersion()}";
             IZKChildListener childListener = new ZKChildListener();
-            childListener.ChildChangeHandler = async (parentPath, currentChilds) =>
+            childListener.ChildChangeHandler =  (parentPath, currentChilds) =>
             {
                 var list = new List<RegisterMeta>(currentChilds.Count);
                 RegisterMeta temp =null;
@@ -111,7 +111,9 @@ namespace Meou.Registry.Zookeeper
                     list.Add(temp);
                 }
       
-                await notify(serviceMeta,NotifyEvent.CHILD_ADDED,sequence,list);
+                 notify(serviceMeta,list);
+
+                return Task.CompletedTask;
             };
 
             //childListener.ChildCountChangedHandler = async (parentPath, currentChilds) =>
@@ -174,6 +176,22 @@ namespace Meou.Registry.Zookeeper
             meta.setConnCount(Convert.ToInt32(array_1[3]));
 
             return meta;
+        }
+
+        private HashSet<RegisterMeta.ServiceMeta> getServiceMeta(RegisterMeta.Address address)
+        {
+            HashSet<RegisterMeta.ServiceMeta> serviceMetaSet;
+            serviceMetaMap.TryGetValue(address,out serviceMetaSet);
+            if (serviceMetaSet == null)
+            {
+                HashSet<RegisterMeta.ServiceMeta> newServiceMetaSet = new HashSet<RegisterMeta.ServiceMeta>();
+                serviceMetaMap.TryAdd(address, newServiceMetaSet);
+                if (serviceMetaSet == null)
+                {
+                    serviceMetaSet = newServiceMetaSet;
+                }
+            }
+            return serviceMetaSet;
         }
 
         public override void destroy()

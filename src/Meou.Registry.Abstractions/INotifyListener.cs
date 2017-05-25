@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Meou.Registry.Abstractions
 {
-    public interface NotifyListener
+    public interface INotifyListener
     {
-        Task Notify(RegisterMeta registerMeta);
+        Task Notify(List<RegisterMeta> registerMeta);
     }
 }
 

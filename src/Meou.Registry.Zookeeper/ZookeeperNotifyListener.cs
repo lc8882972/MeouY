@@ -6,25 +6,20 @@ using System.Threading.Tasks;
 
 namespace Meou.Registry.Zookeeper
 {
-    public class ZookeeperNotifyListener : NotifyListener
+    public class ZookeeperNotifyListener : INotifyListener
     {
-        Action<RegisterMeta> act;
-        public ZookeeperNotifyListener(Action<RegisterMeta> notify)
+        Action<List<RegisterMeta>> act;
+        public ZookeeperNotifyListener(Action<List<RegisterMeta>> notify)
         {
             act = notify;
         }
-        public Task Notify(RegisterMeta registerMeta)
+
+        public Task Notify(List<RegisterMeta> registerMeta)
         {
             if (act != null)
                 act.Invoke(registerMeta);
-            
+
             return Task.CompletedTask;
-
-        }
-
-        protected virtual void NotifyFunc(Action<RegisterMeta> act)
-        {
-           
         }
     }
 }

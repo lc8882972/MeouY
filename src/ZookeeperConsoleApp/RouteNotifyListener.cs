@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 
 namespace ZookeeperConsoleApp
 {
-    public class RouteNotifyListener : NotifyListener
+    public class RouteNotifyListener : INotifyListener
     {
-        public Task Notify(RegisterMeta registerMeta)
+        public Task Notify(List<RegisterMeta> registerMeta)
         {
-            Console.WriteLine(registerMeta.ToString());
-
+            registerMeta.ForEach((item) =>
+            {
+                Console.WriteLine(item.ToString());
+            });
             return Task.CompletedTask;
         }
     }

@@ -101,15 +101,17 @@ namespace Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation
             }
             _registryService.subscribe(temp, new ZookeeperNotifyListener((meta) =>
             {
-                if (!_registerMetaList.ContainsKey(meta.getServiceMeta()))
+                if (!_registerMetaList.ContainsKey(temp))
                 {
-                    _registerMetaList.GetOrAdd(temp, registerMeta);
+                    _registerMetaList.TryAdd(temp, registerMeta);
                 }
                 else
                 {
+                    _registerMetaList.TryUpdate(temp, registerMeta , _registerMetaList[temp]);
                     registerMeta = _registerMetaList[temp];
                 }
             }));
+
             foreach (var item in registerMeta)
             {
                 address.Add(new IpAddressModel()

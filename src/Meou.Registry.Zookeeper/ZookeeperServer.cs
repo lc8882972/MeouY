@@ -8,8 +8,8 @@ namespace Meou.Registry.Zookeeper
 {
     public class ZookeeperServer
     {
-        NotifyListener _listener;
-        public ZookeeperServer(NotifyListener listener)
+        INotifyListener _listener;
+        public ZookeeperServer(INotifyListener listener)
         {
             _listener = listener;
         }

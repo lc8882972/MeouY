@@ -22,7 +22,7 @@ namespace Meou.Registry.Abstractions
         /**
          * Subscribe a service from registry server.
          */
-        void subscribe(RegisterMeta.ServiceMeta serviceMeta, NotifyListener listener);
+        void subscribe(RegisterMeta.ServiceMeta serviceMeta, INotifyListener listener);
 
         /**
          * Find a service in the local scope.

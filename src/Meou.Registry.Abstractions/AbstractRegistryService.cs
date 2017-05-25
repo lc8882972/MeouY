@@ -25,7 +25,7 @@ namespace Meou.Registry.Abstractions
         private BlockingCollection<RegisterMeta> queue = new BlockingCollection<RegisterMeta>();
         private Dictionary<RegisterMeta.ServiceMeta, KeyValuePair<long, List<RegisterMeta>>> registries = new Dictionary<RegisterMeta.ServiceMeta, KeyValuePair<long, List<RegisterMeta>>>();
 
-        private ConcurrentDictionary<RegisterMeta.ServiceMeta, BlockingCollection<NotifyListener>> subscribeListeners = new ConcurrentDictionary<RegisterMeta.ServiceMeta, BlockingCollection<NotifyListener>>();
+        private ConcurrentDictionary<RegisterMeta.ServiceMeta, BlockingCollection<INotifyListener>> subscribeListeners = new ConcurrentDictionary<RegisterMeta.ServiceMeta, BlockingCollection<INotifyListener>>();
         private ConcurrentDictionary<RegisterMeta.Address, BlockingCollection<OfflineListener>> offlineListeners = new ConcurrentDictionary<RegisterMeta.Address, BlockingCollection<OfflineListener>>();
 
         // Consumer已订阅的信息
@@ -107,14 +107,14 @@ namespace Meou.Registry.Abstractions
             doUnregister(meta);
         }
 
-        public void subscribe(ServiceMeta serviceMeta, NotifyListener listener)
+        public void subscribe(ServiceMeta serviceMeta, INotifyListener listener)
         {
-            BlockingCollection<NotifyListener> listeners;
+            BlockingCollection<INotifyListener> listeners;
             subscribeListeners.TryGetValue(serviceMeta, out listeners);
 
             if (listeners == null)
             {
-                BlockingCollection<NotifyListener> newListeners = new BlockingCollection<NotifyListener>();
+                BlockingCollection<INotifyListener> newListeners = new BlockingCollection<INotifyListener>();
                 subscribeListeners.TryAdd(serviceMeta, newListeners);
                 if (listeners == null)
                 {
@@ -126,70 +126,17 @@ namespace Meou.Registry.Abstractions
             doSubscribe(serviceMeta);
         }
 
-        protected Task notify(ServiceMeta serviceMeta, NotifyEvent @event, long version, List<RegisterMeta> array)
+        protected void notify(ServiceMeta serviceMeta, List<RegisterMeta> array)
         {
-
-            if (array == null || array.Count == 0)
+            BlockingCollection<INotifyListener> listeners;
+            subscribeListeners.TryGetValue(serviceMeta, out listeners);
+            if (listeners != null)
             {
-                return Task.FromResult<object>(null);
-            }
-
-            bool notifyNeeded = false;
-            KeyValuePair<long, List<RegisterMeta>> data;
-            registries.TryGetValue(serviceMeta, out data);
-
-            if (data.Value == null || data.Value.Count == 0)
-            {
-                if (@event == NotifyEvent.CHILD_REMOVED)
+                foreach (var item in listeners)
                 {
-                    return Task.FromResult<object>(null); ;
-                }
-
-                List<RegisterMeta> metaList = new List<RegisterMeta>(array);
-                data = new KeyValuePair<long, List<RegisterMeta>>(version, metaList);
-                notifyNeeded = true;
-            }
-            else
-            {
-                long oldVersion = data.Key;
-                List<RegisterMeta> metaList = data.Value;
-                if (oldVersion < version || (version < 0 && oldVersion > 0 /* version 溢出 */))
-                {
-                    if (@event == NotifyEvent.CHILD_REMOVED)
-                    {
-                        foreach (var item in array)
-                        {
-                            metaList.Remove(item);
-                        }
-                    }
-                    else if (@event == NotifyEvent.CHILD_ADDED)
-                    {
-
-                        metaList.AddRange(array);
-                    }
-                    data = new KeyValuePair<long, List<RegisterMeta>>(version, metaList);
-                    notifyNeeded = true;
+                    item.Notify(array);
                 }
             }
-            registries.Add(serviceMeta, data);
-
-            if (notifyNeeded)
-            {
-                BlockingCollection<NotifyListener> listeners;
-                subscribeListeners.TryGetValue(serviceMeta, out listeners);
-                if (listeners != null)
-                {
-                    foreach (var item in listeners)
-                    {
-                        foreach (RegisterMeta m in array)
-                        {
-                            item.Notify(m);
-                        }
-                    }
-                }
-            }
-
-            return Task.FromResult<object>(null);
         }
 
         public void offlineListening(RegisterMeta.Address address, OfflineListener listener)
