@@ -1,8 +1,8 @@
-﻿using Meou.Registry.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Meou.Registry.Abstractions;
 
 namespace Echo.Client
 {

@@ -1,8 +1,9 @@
-﻿using Meou.Registry.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Meou.Common;
+using Meou.Registry.Abstractions;
 
 namespace Meou.Registry.Zookeeper
 {

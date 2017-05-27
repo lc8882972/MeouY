@@ -11,7 +11,18 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddZookeeperRegistry(this IServiceCollection services)
         {
-            services.AddSingleton<IRegistryServiceBuilder, ZookeeperRegistryServiceBuilder>();
+            return AddZookeeperRegistry(services, (option) => { });
+        }
+        public static IServiceCollection AddZookeeperRegistry(this IServiceCollection services, Action<ZookeeperOption> configureOptions)
+        {
+            services.AddOptions();
+            var options = new ZookeeperOption();
+            if (configureOptions != null)
+            {
+                configureOptions(options);
+            }
+            services.Configure(configureOptions);
+            services.AddSingleton<RegistryService, ZookeeperRegistryService>();
             return services;
         }
     }

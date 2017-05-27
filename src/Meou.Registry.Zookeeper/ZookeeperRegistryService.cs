@@ -2,46 +2,41 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Collections.Concurrent;
-using Meou.Registry.Abstractions;
 using System.Collections.ObjectModel;
-using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 using ZooKeeperClient.Client;
 using ZooKeeperClient.Listener;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Meou.Registry.Abstractions;
+using Microsoft.Extensions.Options;
+using Meou.Common;
 
 namespace Meou.Registry.Zookeeper
 {
     public class ZookeeperRegistryService : AbstractRegistryService
     {
-        private static int sequence = 0;
-        private string serviceAddr = "127.0.0.1:8022";
-        private string address = "127.0.0.1:2181";
-        private int sessionTimeout = 60 * 1000;
-        private int connectionTimeout = 15 * 1000;
-        private ConcurrentDictionary<RegisterMeta.Address, HashSet<RegisterMeta.ServiceMeta>> serviceMetaMap = new ConcurrentDictionary<RegisterMeta.Address, HashSet<RegisterMeta.ServiceMeta>>();
+        public ZookeeperOption Options { get; set; }
+
+        private ConcurrentDictionary<Address, HashSet<ServiceMeta>> serviceMetaMap = new ConcurrentDictionary<Address, HashSet<ServiceMeta>>();
         private ZKClient configClient;
 
-        public ZookeeperRegistryService(ILoggerFactory loggerFactory) : base(loggerFactory)
+        public ZookeeperRegistryService(IOptions<ZookeeperOption> options,ILoggerFactory loggerFactory) : base(loggerFactory)
         {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+            this.Options = options.Value;
 
+            configClient = ZKClientBuilder.NewZKClient(this.Options.ConnectString)
+                           .SessionTimeout(this.Options.SessionTimeout)//可选  
+                           .ConnectionTimeout(this.Options.ConnectionTimeout)//可选  
+                           .Build(); //创建实例
         }
 
-        public ZookeeperRegistryService(string connectString, ILoggerFactory loggerFactory) : base(loggerFactory)
+        public override Collection<RegisterMeta> lookup(ServiceMeta serviceMeta)
         {
-            address = connectString;
-        }
-
-        public override void connectToRegistryServer(String connectString)
-        {
-            configClient = ZKClientBuilder.NewZKClient(connectString)
-                                       .SessionTimeout(sessionTimeout)//可选  
-                                       .ConnectionTimeout(connectionTimeout)//可选  
-                                       .Build(); //创建实例
-        }
-
-        public override Collection<RegisterMeta> lookup(RegisterMeta.ServiceMeta serviceMeta)
-        {
-            string directory = $"/jupiter/provider/{serviceMeta.getGroup()}/{serviceMeta.getServiceProviderName()}/{serviceMeta.getVersion()}";
+            string directory = $"/meou/provider/{serviceMeta.getGroup()}/{serviceMeta.getName()}/{serviceMeta.getVersion()}";
             List<RegisterMeta> registerMetaList = new List<RegisterMeta>();
             try
             {
@@ -64,7 +59,7 @@ namespace Meou.Registry.Zookeeper
 
         protected override void doRegister(RegisterMeta meta)
         {
-            string directory = $"/jupiter/provider/{meta.getGroup()}/{meta.getServiceProviderName()}/{meta.getVersion()}";
+            string directory = $"/meou/provider/{meta.getGroup()}/{meta.getName()}/{meta.getVersion()}";
             try
             {
                 var result = configClient.ExistsAsync(directory).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -97,9 +92,9 @@ namespace Meou.Registry.Zookeeper
             }
         }
 
-        protected override void doSubscribe(RegisterMeta.ServiceMeta serviceMeta)
+        protected override void doSubscribe(ServiceMeta serviceMeta)
         {
-            string directory = $"/jupiter/provider/{serviceMeta.getGroup()}/{serviceMeta.getServiceProviderName()}/{serviceMeta.getVersion()}";
+            string directory = $"/meou/provider/{serviceMeta.getGroup()}/{serviceMeta.getName()}/{serviceMeta.getVersion()}";
             IZKChildListener childListener = new ZKChildListener();
             childListener.ChildChangeHandler =  (parentPath, currentChilds) =>
             {
@@ -126,7 +121,7 @@ namespace Meou.Registry.Zookeeper
 
         protected override void doUnregister(RegisterMeta meta)
         {
-            string directory = $"/jupiter/provider/{meta.getGroup()}/{meta.getServiceProviderName()}/{meta.getVersion()}";
+            string directory = $"/meou/provider/{meta.getGroup()}/{meta.getName()}/{meta.getVersion()}";
 
             try
             {
@@ -146,7 +141,7 @@ namespace Meou.Registry.Zookeeper
 
             try
             {
-                meta.setHost(address);
+                //meta.setHost(address);
                 string tempPath = $"{directory}/{meta.getHost()}:{meta.getPort()}:{meta.getWeight()}:{meta.getConnCount()}";
 
                 // The znode will be deleted upon the client's disconnect.
@@ -166,7 +161,7 @@ namespace Meou.Registry.Zookeeper
             String[] array_0 = data.Split('/');
             RegisterMeta meta = new RegisterMeta();
             meta.setGroup(array_0[3]);
-            meta.setServiceProviderName(array_0[4]);
+            meta.setName(array_0[4]);
             meta.setVersion(array_0[5]);
 
             String[] array_1 = array_0[6].Split(':');
@@ -178,13 +173,13 @@ namespace Meou.Registry.Zookeeper
             return meta;
         }
 
-        private HashSet<RegisterMeta.ServiceMeta> getServiceMeta(RegisterMeta.Address address)
+        private HashSet<ServiceMeta> getServiceMeta(Address address)
         {
-            HashSet<RegisterMeta.ServiceMeta> serviceMetaSet;
+            HashSet<ServiceMeta> serviceMetaSet;
             serviceMetaMap.TryGetValue(address,out serviceMetaSet);
             if (serviceMetaSet == null)
             {
-                HashSet<RegisterMeta.ServiceMeta> newServiceMetaSet = new HashSet<RegisterMeta.ServiceMeta>();
+                HashSet<ServiceMeta> newServiceMetaSet = new HashSet<ServiceMeta>();
                 serviceMetaMap.TryAdd(address, newServiceMetaSet);
                 if (serviceMetaSet == null)
                 {

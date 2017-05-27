@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Meou.Registry.Abstractions;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,12 +42,13 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Attributes
             var services = _types.Where(i =>
             {
                 var typeInfo = i.GetTypeInfo();
-                return typeInfo.IsInterface && typeInfo.GetCustomAttribute<RpcServiceBundleAttribute>() != null;
+                return typeInfo.IsInterface && typeInfo.GetCustomAttribute<ServiceProviderAttribute>() != null;
             }).ToArray();
+
             var serviceImplementations = _types.Where(i =>
             {
                 var typeInfo = i.GetTypeInfo();
-                return typeInfo.IsClass && !typeInfo.IsAbstract && i.Namespace != null && !i.Namespace.StartsWith("System") &&
+                return typeInfo.IsClass && typeInfo.IsPublic && !typeInfo.IsAbstract && i.Namespace != null && !i.Namespace.StartsWith("System") &&
                 !i.Namespace.StartsWith("Microsoft");
             }).ToArray();
 

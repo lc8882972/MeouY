@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using Meou.Registry.Zookeeper;
+using Meou.Common;
 
 namespace Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation
 {
@@ -25,15 +26,14 @@ namespace Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation
         private readonly IAddressSelector _addressSelector;
         private readonly IHealthCheckService _healthCheckService;
         private readonly RegistryService _registryService;
-        private ConcurrentDictionary<RegisterMeta.ServiceMeta, Collection<RegisterMeta>> _registerMetaList =new ConcurrentDictionary<RegisterMeta.ServiceMeta, Collection<RegisterMeta>>();
+        private ConcurrentDictionary<ServiceMeta, Collection<RegisterMeta>> _registerMetaList =new ConcurrentDictionary<ServiceMeta, Collection<RegisterMeta>>();
         #endregion Field
 
         #region Constructor
 
-        public DefaultAddressResolver(IRegistryServiceBuilder registryServiceBuilder, IRegisterMetaDiscoveryProvider serviceProvider, IServiceRouteManager serviceRouteManager, ILogger<DefaultAddressResolver> logger, IAddressSelector addressSelector, IHealthCheckService healthCheckService)
+        public DefaultAddressResolver(RegistryService registryService, IRegisterMetaDiscoveryProvider serviceProvider, IServiceRouteManager serviceRouteManager, ILogger<DefaultAddressResolver> logger, IAddressSelector addressSelector, IHealthCheckService healthCheckService)
         {
-            _registryService = registryServiceBuilder.Builder();
-            _registryService.connectToRegistryServer("localhost:2181");
+            _registryService = registryService;
             _serviceProvider = serviceProvider;
             _serviceRouteManager = serviceRouteManager;
             _logger = logger;
@@ -89,8 +89,8 @@ namespace Rabbit.Rpc.Runtime.Client.Address.Resolvers.Implementation
             var address = new List<AddressModel>();
             string[] array = serviceId.Split('.');
             Collection<RegisterMeta> registerMeta = null;
-            RegisterMeta.ServiceMeta temp = new RegisterMeta.ServiceMeta();
-            temp.setServiceProviderName(array[1]);
+            ServiceMeta temp = new ServiceMeta();
+            temp.setName(array[1]);
             temp.setGroup(array[0]);
             temp.setVersion("0.0.0");
             if (!_registerMetaList.ContainsKey(temp)) {

@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Meou.RPC.Abstractions\Meou.RPC.Abstractions.csproj" />
+    <ProjectReference Include="..\Meou.RPC.Abstractions\Meou.RPC.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

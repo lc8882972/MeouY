@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Threading;
-using static Meou.Registry.Abstractions.RegisterMeta;
+
 using Microsoft.Extensions.Logging;
+using Meou.Common;
 
 namespace Meou.Registry.Abstractions
 {
@@ -23,10 +21,10 @@ namespace Meou.Registry.Abstractions
         private bool shutdown = false;
 
         private BlockingCollection<RegisterMeta> queue = new BlockingCollection<RegisterMeta>();
-        private Dictionary<RegisterMeta.ServiceMeta, KeyValuePair<long, List<RegisterMeta>>> registries = new Dictionary<RegisterMeta.ServiceMeta, KeyValuePair<long, List<RegisterMeta>>>();
+        private Dictionary<ServiceMeta, KeyValuePair<long, List<RegisterMeta>>> registries = new Dictionary<ServiceMeta, KeyValuePair<long, List<RegisterMeta>>>();
 
-        private ConcurrentDictionary<RegisterMeta.ServiceMeta, BlockingCollection<INotifyListener>> subscribeListeners = new ConcurrentDictionary<RegisterMeta.ServiceMeta, BlockingCollection<INotifyListener>>();
-        private ConcurrentDictionary<RegisterMeta.Address, BlockingCollection<OfflineListener>> offlineListeners = new ConcurrentDictionary<RegisterMeta.Address, BlockingCollection<OfflineListener>>();
+        private ConcurrentDictionary<ServiceMeta, BlockingCollection<INotifyListener>> subscribeListeners = new ConcurrentDictionary<ServiceMeta, BlockingCollection<INotifyListener>>();
+        private ConcurrentDictionary<Address, BlockingCollection<OfflineListener>> offlineListeners = new ConcurrentDictionary<Address, BlockingCollection<OfflineListener>>();
 
         // Consumer已订阅的信息
         private HashSet<ServiceMeta> subscribeSet = new HashSet<ServiceMeta>();
@@ -69,9 +67,8 @@ namespace Meou.Registry.Abstractions
             return shutdown;
         }
 
-        public void shutdownGracefully()
+        public void Shutdown()
         {
-            //Interlocked.CompareExchange(ref shutdown, true, false);
             if (!shutdown)
             {
                 destroy();
@@ -79,7 +76,7 @@ namespace Meou.Registry.Abstractions
             shutdown = true;
         }
 
-        public virtual Collection<RegisterMeta> lookup(RegisterMeta.ServiceMeta serviceMeta)
+        public virtual Collection<RegisterMeta> lookup(ServiceMeta serviceMeta)
         {
             KeyValuePair<long, List<RegisterMeta>> data;
 
@@ -139,7 +136,7 @@ namespace Meou.Registry.Abstractions
             }
         }
 
-        public void offlineListening(RegisterMeta.Address address, OfflineListener listener)
+        public void offlineListening(Address address, OfflineListener listener)
         {
             BlockingCollection<OfflineListener> listeners;
             offlineListeners.TryGetValue(address,out listeners);
@@ -155,7 +152,7 @@ namespace Meou.Registry.Abstractions
             }
             listeners.TryAdd(listener);
         }
-        public void offline(RegisterMeta.Address address)
+        public void offline(Address address)
         {
             // remove & notify
             BlockingCollection<OfflineListener> listeners;
@@ -170,7 +167,7 @@ namespace Meou.Registry.Abstractions
         }
 
         protected abstract void doRegister(RegisterMeta meta);
-        protected abstract void doSubscribe(RegisterMeta.ServiceMeta serviceMeta);
+        protected abstract void doSubscribe(ServiceMeta serviceMeta);
         protected abstract void doUnregister(RegisterMeta meta);
         public abstract void destroy();
     }

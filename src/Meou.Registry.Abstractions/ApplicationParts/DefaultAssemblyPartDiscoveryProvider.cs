@@ -14,6 +14,8 @@ namespace Meou.Registry.Abstractions
         {
             "Meou.Registry.Abstractions",
             "Meou.Registry.Zookeeper",
+            "Meou.Transport.DotNetty",
+            "Meou.Rpc.Codec.ProtoBuffer",
             "ZookeeperClientCore"
         };
 

@@ -23,12 +23,12 @@ namespace Meou.RPC.Abstractions.Routing.Implementation
         #endregion Field
 
         public RegistryServiceRouteManager(
-            IRegistryServiceBuilder registryServiceBuilder,
+            RegistryService registryService,
             ISerializer<string> serializer,
             IServiceRouteFactory serviceRouteFactory,
             ILogger<RegistryServiceRouteManager> logger) : base(serializer)
         {
-            _registryService = registryServiceBuilder.Builder();
+            _registryService = registryService;
             _serializer = serializer;
             _serviceRouteFactory = serviceRouteFactory;
             _logger = logger;

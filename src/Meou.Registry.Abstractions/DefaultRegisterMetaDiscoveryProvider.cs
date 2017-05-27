@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using Meou.Common;
 
 namespace Meou.Registry.Abstractions
 {
@@ -71,7 +72,7 @@ namespace Meou.Registry.Abstractions
                                 switch (iarg.MemberName)
                                 {
                                     case "name":
-                                        tempMeta.setServiceProviderName(iarg.TypedValue.Value.ToString());
+                                        tempMeta.setName(iarg.TypedValue.Value.ToString());
                                         break;
                                     case "group":
                                         tempMeta.setGroup(iarg.TypedValue.Value.ToString());
@@ -122,7 +123,7 @@ namespace Meou.Registry.Abstractions
                         switch (arg.MemberName)
                         {
                             case "name":
-                                tempMeta.setServiceProviderName(arg.TypedValue.Value.ToString());
+                                tempMeta.setName(arg.TypedValue.Value.ToString());
                                 break;
                             case "group":
                                 tempMeta.setGroup(arg.TypedValue.Value.ToString());

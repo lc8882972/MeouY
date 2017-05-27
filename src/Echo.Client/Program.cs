@@ -1,14 +1,15 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Rabbit.Rpc;
-using Rabbit.Rpc.Exceptions;
-using Rabbit.Rpc.ProxyGenerator;
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Rabbit.Transport.DotNetty;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Rabbit.Rpc;
+using Rabbit.Rpc.Exceptions;
+using Rabbit.Rpc.ProxyGenerator;
+using System.Diagnostics;
 
 namespace Echo.Client
 {
@@ -16,7 +17,7 @@ namespace Echo.Client
     {
         public static void Main(string[] args)
         {
-            //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             var serviceCollection = new ServiceCollection();
 
@@ -25,13 +26,13 @@ namespace Echo.Client
                 .AddServiceConsumer()
                 .AddZookeeperRegistry()
                 .AddClient()
-                .UseRegistryRouteManager("localhosts:2181")
+                .UseRegistryRouteManager()
                 .UseDotNettyTransport();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             serviceProvider.GetRequiredService<ILoggerFactory>()
-                .AddConsole((c, l) => (int)l >= 3);
+                .AddConsole();
 
             var serviceProxyGenerater = serviceProvider.GetRequiredService<IServiceProxyGenerater>();
             var serviceProxyFactory = serviceProvider.GetRequiredService<IServiceProxyFactory>();
@@ -47,17 +48,11 @@ namespace Echo.Client
                 {
                     try
                     {
+                        Stopwatch watch = new Stopwatch();
+                        watch.Start();
                         Console.WriteLine($"userService.GetUserName:{await userService.GetUserName(1)}");
-                        //Console.WriteLine($"userService.GetUserId:{await userService.GetUserId("rabbit")}");
-                        //Console.WriteLine(
-                        //    $"userService.GetUserLastSignInTime:{await userService.GetUserLastSignInTime(1)}");
-                        //Console.WriteLine($"userService.Exists:{await userService.Exists(1)}");
-                        //var user = await userService.GetUser(1);
-                        //Console.WriteLine($"userService.GetUser:name={user.Name},age={user.Age}");
-                        //Console.WriteLine($"userService.Update:{await userService.Update(1, user)}");
-                        //Console.WriteLine($"userService.GetDictionary:{(await userService.GetDictionary())["key"]}");
-                        //await userService.Try();
-                        //await userService.TryThrowException();
+                        watch.Stop();
+                        logger.LogInformation($"执行耗时：{watch.ElapsedMilliseconds}/ms");
                     }
                     catch (RpcRemoteException remoteException)
                     {

@@ -4,10 +4,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Meou.Common;
 
 namespace Meou.Registry.Abstractions
 {
-    public interface RegistryService : Registry
+    public interface RegistryService
     {
         /**
         * Register service to registry server.
@@ -22,12 +23,12 @@ namespace Meou.Registry.Abstractions
         /**
          * Subscribe a service from registry server.
          */
-        void subscribe(RegisterMeta.ServiceMeta serviceMeta, INotifyListener listener);
+        void subscribe(ServiceMeta serviceMeta, INotifyListener listener);
 
         /**
          * Find a service in the local scope.
          */
-        Collection<RegisterMeta> lookup(RegisterMeta.ServiceMeta serviceMeta);
+        Collection<RegisterMeta> lookup(ServiceMeta serviceMeta);
 
         /**
          * Returns {@code true} if {@link RegistryService} is shutdown.
@@ -37,6 +38,6 @@ namespace Meou.Registry.Abstractions
         /**
          * Shutdown.
          */
-        void shutdownGracefully();
+        void Shutdown();
     }
 }

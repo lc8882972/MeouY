@@ -1,18 +1,18 @@
-﻿using Meou.Registry.Zookeeper;
-using System;
+﻿//using Meou.Registry.Zookeeper;
+//using System;
 
-namespace ZookeeperConsoleApp
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            ZookeeperServer zs = new ZookeeperServer( new RouteNotifyListener());
-            zs.Start();
+//namespace ZookeeperConsoleApp
+//{
+//    class Program
+//    {
+//        static void Main(string[] args)
+//        {
+//            ZookeeperServer zs = new ZookeeperServer( new RouteNotifyListener());
+//            zs.Start();
 
-            Console.ReadLine();
+//            Console.ReadLine();
 
-            zs.Stop();
-        }
-    }
-}
+//            zs.Stop();
+//        }
+//    }
+//}

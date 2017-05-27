@@ -150,11 +150,11 @@ namespace Rabbit.Rpc
         /// <param name="builder">Rpc服务构建者。</param>
         /// <param name="filePath">文件路径。</param>
         /// <returns>Rpc服务构建者。</returns>
-        public static IRpcBuilder UseRegistryRouteManager(this IRpcBuilder builder, string connString)
+        public static IRpcBuilder UseRegistryRouteManager(this IRpcBuilder builder)
         {
             return builder.UseRouteManager(provider =>
             new RegistryServiceRouteManager(
-                provider.GetRequiredService<IRegistryServiceBuilder>(),
+                provider.GetRequiredService<RegistryService>(),
                 provider.GetRequiredService<ISerializer<string>>(),
                 provider.GetRequiredService<IServiceRouteFactory>(),
                 provider.GetRequiredService<ILogger<RegistryServiceRouteManager>>()));
@@ -303,7 +303,6 @@ namespace Rabbit.Rpc
         {
             var services = builder.Services;
 
-            //            services.AddSingleton<IServiceInstanceFactory, DefaultServiceInstanceFactory>();
             services.AddSingleton<IClrServiceEntryFactory, ClrServiceEntryFactory>();
             services.AddSingleton<IServiceEntryProvider>(provider =>
             {

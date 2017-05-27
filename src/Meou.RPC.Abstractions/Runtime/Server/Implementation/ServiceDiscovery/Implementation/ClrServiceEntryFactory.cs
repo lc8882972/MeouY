@@ -1,12 +1,14 @@
-using Microsoft.Extensions.DependencyInjection;
-using Rabbit.Rpc.Convertibles;
-using Rabbit.Rpc.Ids;
-using Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Rabbit.Rpc.Convertibles;
+using Rabbit.Rpc.Ids;
+using Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
+using System.Diagnostics;
 
 namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementation
 {
@@ -20,16 +22,18 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementati
         private readonly IServiceProvider _serviceProvider;
         private readonly IServiceIdGenerator _serviceIdGenerator;
         private readonly ITypeConvertibleService _typeConvertibleService;
+        private readonly ILogger _logger;
 
         #endregion Field
 
         #region Constructor
 
-        public ClrServiceEntryFactory(IServiceProvider serviceProvider, IServiceIdGenerator serviceIdGenerator, ITypeConvertibleService typeConvertibleService)
+        public ClrServiceEntryFactory(IServiceProvider serviceProvider, IServiceIdGenerator serviceIdGenerator, ITypeConvertibleService typeConvertibleService,ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _serviceIdGenerator = serviceIdGenerator;
             _typeConvertibleService = typeConvertibleService;
+            _logger = loggerFactory.CreateLogger<ClrServiceEntryFactory>();
         }
 
         #endregion Constructor
@@ -75,6 +79,9 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementati
                 Descriptor = serviceDescriptor,
                 Func = parameters =>
                {
+
+                   Stopwatch watch = new Stopwatch();
+                   watch.Start();
                    var serviceScopeFactory = _serviceProvider.GetRequiredService<IServiceScopeFactory>();
                    using (var scope = serviceScopeFactory.CreateScope())
                    {
@@ -91,7 +98,8 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementati
                        }
 
                        var result = implementationMethod.Invoke(instance, list.ToArray());
-
+                       watch.Stop();
+                       _logger.LogInformation($"Ö´ÐÐºÄÊ±£º{watch.ElapsedMilliseconds}/ms");
                        return Task.FromResult(result);
                    }
                }

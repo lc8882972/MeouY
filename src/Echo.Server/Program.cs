@@ -27,7 +27,7 @@ namespace Echo.Server
 
         public static void Main(string[] args)
         {
-            //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             var serviceCollection = new ServiceCollection();
 
@@ -37,7 +37,7 @@ namespace Echo.Server
                 .AddZookeeperRegistry()
                 .AddRpcCore()
                 .AddServiceRuntime()
-                .UseRegistryRouteManager("localhost:2181")
+                .UseRegistryRouteManager()
                 .UseDotNettyTransport();
 
             serviceCollection.AddTransient<IUserService, UserService>();
@@ -45,7 +45,7 @@ namespace Echo.Server
             var serviceProvider = serviceCollection.BuildServiceProvider();
             RegistryService registry = null;
             serviceProvider.GetRequiredService<ILoggerFactory>()
-                .AddConsole((c, l) => (int)l >= 3);
+                .AddConsole();
 
             //自动生成服务路由（这边的文件与Echo.Client为强制约束）
             {
@@ -53,9 +53,8 @@ namespace Echo.Server
 
                 var metas = registerMetaDiscoveryProvider.Builder();
 
-                IRegistryServiceBuilder registryServiceBuilder = serviceProvider.GetRequiredService<IRegistryServiceBuilder>();
-                registry = registryServiceBuilder.Builder();
-                registry.connectToRegistryServer("localhost:2181");
+                registry = serviceProvider.GetRequiredService<RegistryService>();
+             
                 foreach (var meta in metas)
                 {
                     meta.setHost("127.0.0.1");
@@ -63,14 +62,14 @@ namespace Echo.Server
                     registry.register(meta);
                 } 
 
-                var serviceEntryManager = serviceProvider.GetRequiredService<IServiceEntryManager>();
-                var addressDescriptors = serviceEntryManager.GetEntries().Select(i => new ServiceRoute
-                {
-                    ServiceDescriptor = i.Descriptor
-                });
+                //var serviceEntryManager = serviceProvider.GetRequiredService<IServiceEntryManager>();
+                //var addressDescriptors = serviceEntryManager.GetEntries().Select(i => new ServiceRoute
+                //{
+                //    ServiceDescriptor = i.Descriptor
+                //});
 
-                var serviceRouteManager = serviceProvider.GetRequiredService<IServiceRouteManager>();
-                serviceRouteManager.SetRoutesAsync(addressDescriptors).Wait();
+                //var serviceRouteManager = serviceProvider.GetRequiredService<IServiceRouteManager>();
+                //serviceRouteManager.SetRoutesAsync(addressDescriptors).Wait();
             }
 
             var serviceHost = serviceProvider.GetRequiredService<IServiceHost>();
@@ -88,7 +87,7 @@ namespace Echo.Server
                 key = Console.ReadKey();
             }
 
-            registry.shutdownGracefully();
+            registry.Shutdown();
         }
     }
 }

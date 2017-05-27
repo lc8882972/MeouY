@@ -9,7 +9,6 @@ namespace Meou.Registry.Abstractions
 {
     public interface RegistryServer : RegistryMonitor
     {
-
         void startRegistryServer();
     }
 }
