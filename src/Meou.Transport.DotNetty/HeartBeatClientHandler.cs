@@ -32,5 +32,10 @@ namespace Meou.Transport.DotNetty
             }
             ReferenceCountUtil.Release(msg);
         }
+
+        public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
+        {
+            context.CloseAsync().Wait();
+        }
     }
 }

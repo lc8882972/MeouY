@@ -71,7 +71,7 @@ namespace Meou.Transport.DotNetty
             }
             protected override void InitChannel(ISocketChannel channel)
             {
-                channel.Pipeline.AddLast(new IdleStateHandler(5, 0, 0));
+                channel.Pipeline.AddLast(new IdleStateHandler(8, 0, 0));
                 channel.Pipeline.AddLast(idleStateTrigger);
                 channel.Pipeline.AddLast("decoder", new StringDecoder());
                 channel.Pipeline.AddLast("encoder", new StringEncoder());

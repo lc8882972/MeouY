@@ -13,6 +13,7 @@ namespace Meou.Transport
     public abstract class ConnectionWatchdog : ChannelHandlerAdapter, ChannelHandlerHolder, ITimerTask
     {
         private readonly Bootstrap bootstrap;
+        private IChannel channel;
         private readonly ITimer timer;
         private readonly int port;
         private readonly String host;
@@ -32,7 +33,6 @@ namespace Meou.Transport
             this.port = port;
             this.host = host;
             this.reconnect = reconnect;
-
         }
 
         public abstract IChannelHandler[] handlers();
@@ -41,12 +41,14 @@ namespace Meou.Transport
         public override void ChannelActive(IChannelHandlerContext context)
         {
             Console.WriteLine("当前链路已经激活了，重连尝试次数重新置为0");
+            channel = context.Channel;
             attempts = 0;
             context.FireChannelActive();
         }
 
         public override void ChannelInactive(IChannelHandlerContext context)
         {
+            channel = context.Channel;
             Console.WriteLine(reconnect);
             if (reconnect > 0)
             {
@@ -58,10 +60,8 @@ namespace Meou.Transport
                 Console.WriteLine(attempts);
                 //重连的间隔时间会越来越长  
                 int timeout = 2 << attempts;
-                Console.WriteLine(timeout);
+                Console.WriteLine($"间隔时间：{timeout}");
                 timer.NewTimeout(this, TimeSpan.FromMilliseconds(timeout));
-
-
             }
             context.FireChannelInactive();
         }
@@ -71,14 +71,11 @@ namespace Meou.Transport
             IChannel future = null;
             try
             {
-                //Monitor.Enter(bootstrap);
-
                 lock (lookobj)
                 {
                     bootstrap.Handler(new DefaultChannelInitializer(handlers()));
                     future = bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(host), port)).ConfigureAwait(false).GetAwaiter().GetResult();
                 }
-
             }
             catch (Exception e)
             {

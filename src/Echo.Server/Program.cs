@@ -1,18 +1,16 @@
-﻿using Echo.Service;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Rabbit.Rpc;
-using Rabbit.Rpc.Address;
-using Rabbit.Rpc.Routing;
-using Rabbit.Rpc.Runtime.Server;
-using System;
+﻿using System;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Rabbit.Transport.DotNetty;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Meou.Registry.Abstractions;
+using Rabbit.Rpc;
+using Rabbit.Transport.DotNetty;
+using Rabbit.Rpc.Runtime.Server;
+using Echo.Service;
 
 namespace Echo.Server
 {
@@ -37,39 +35,26 @@ namespace Echo.Server
                 .AddZookeeperRegistry()
                 .AddRpcCore()
                 .AddServiceRuntime()
-                .UseRegistryRouteManager()
                 .UseDotNettyTransport();
 
             serviceCollection.AddTransient<IUserService, UserService>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
+
             RegistryService registry = null;
             serviceProvider.GetRequiredService<ILoggerFactory>()
                 .AddConsole();
 
-            //自动生成服务路由（这边的文件与Echo.Client为强制约束）
+            var registerMetaDiscoveryProvider = serviceProvider.GetRequiredService<IRegisterMetaDiscoveryProvider>();
+            var metas = registerMetaDiscoveryProvider.Builder();
+
+            registry = serviceProvider.GetRequiredService<RegistryService>();
+
+            foreach (var meta in metas)
             {
-                var registerMetaDiscoveryProvider = serviceProvider.GetRequiredService<IRegisterMetaDiscoveryProvider>();
-
-                var metas = registerMetaDiscoveryProvider.Builder();
-
-                registry = serviceProvider.GetRequiredService<RegistryService>();
-             
-                foreach (var meta in metas)
-                {
-                    meta.setHost("127.0.0.1");
-                    meta.setPort(9981);
-                    registry.register(meta);
-                } 
-
-                //var serviceEntryManager = serviceProvider.GetRequiredService<IServiceEntryManager>();
-                //var addressDescriptors = serviceEntryManager.GetEntries().Select(i => new ServiceRoute
-                //{
-                //    ServiceDescriptor = i.Descriptor
-                //});
-
-                //var serviceRouteManager = serviceProvider.GetRequiredService<IServiceRouteManager>();
-                //serviceRouteManager.SetRoutesAsync(addressDescriptors).Wait();
+                meta.setHost("127.0.0.1");
+                meta.setPort(9981);
+                registry.register(meta);
             }
 
             var serviceHost = serviceProvider.GetRequiredService<IServiceHost>();
@@ -78,6 +63,7 @@ namespace Echo.Server
             {
                 //启动主机
                 await serviceHost.StartAsync(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9981));
+                
                 Console.WriteLine($"服务端启动成功，{DateTime.Now}。");
             });
             var key = Console.ReadKey();

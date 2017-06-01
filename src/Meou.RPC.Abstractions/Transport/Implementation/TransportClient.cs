@@ -27,7 +27,10 @@ namespace Rabbit.Rpc.Transport.Implementation
 
         #region Constructor
 
-        public TransportClient(IMessageSender messageSender, IMessageListener messageListener, ILogger logger,
+        public TransportClient(
+            IMessageSender messageSender, 
+            IMessageListener messageListener, 
+            ILogger logger,
             IServiceExecutor serviceExecutor)
         {
             _messageSender = messageSender;

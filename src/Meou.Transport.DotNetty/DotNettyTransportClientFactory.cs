@@ -3,6 +3,7 @@ using DotNetty.Common.Utilities;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using Meou.Transport.DotNetty;
 using Microsoft.Extensions.Logging;
 using Rabbit.Rpc.Messages;
 using Rabbit.Rpc.Runtime.Server;
@@ -24,7 +25,7 @@ namespace Rabbit.Transport.DotNetty
     public class DotNettyTransportClientFactory : ITransportClientFactory, IDisposable
     {
         #region Field
-
+        protected readonly HashedWheelTimer timer = new HashedWheelTimer();
         private readonly ITransportMessageEncoder _transportMessageEncoder;
         private readonly ITransportMessageDecoder _transportMessageDecoder;
         private readonly ILogger<DotNettyTransportClientFactory> _logger;
@@ -60,6 +61,8 @@ namespace Rabbit.Transport.DotNetty
                 pipeline.AddLast(new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
                 pipeline.AddLast(new DefaultChannelHandler(this));
             }));
+         
+
         }
 
         #endregion Constructor
@@ -74,6 +77,8 @@ namespace Rabbit.Transport.DotNetty
         public ITransportClient CreateClient(EndPoint endPoint)
         {
             var key = endPoint;
+
+          
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备为服务端地址：{key}创建客户端。");
             try
@@ -83,6 +88,7 @@ namespace Rabbit.Transport.DotNetty
                     {
 
                         var bootstrap = _bootstrap;
+                        //new HeartBeatsClient().Connect(endPoint, 3);
                         var channel = bootstrap.ConnectAsync(k).Result;
 
                         var messageListener = new MessageListener();

@@ -30,12 +30,11 @@ namespace Meou.Transport.DotNetty
             watchdog = new DefaultConnectionWatchdog(boot, timer, port, host, reconnect);
             boot.Group(group)
                 .Channel<TcpSocketChannel>()
-                .Handler(new LoggingHandler(LogLevel.INFO));
+                .Handler(new LoggingHandler(LogLevel.INFO))
+                .Handler(new DefaultChannelInitializer(watchdog)); ;
             try
             {
-                boot.Handler(new DefaultChannelInitializer(watchdog));
                 channel = boot.ConnectAsync(new IPEndPoint(IPAddress.Parse(host), port)).ConfigureAwait(false).GetAwaiter().GetResult();
-
                 return channel;
             }
             catch (Exception e)
@@ -59,37 +58,6 @@ namespace Meou.Transport.DotNetty
         {
             channel.Pipeline.AddLast(watchdog.handlers());
         }
-    }
-
-    class DefaultConnectionWatchdog : ConnectionWatchdog
-    {
-        private ConnectorIdleStateTrigger idleStateTrigger = new ConnectorIdleStateTrigger();
-        private Bootstrap boot;
-        private ITimer timer;
-        private int port;
-        private string host;
-        private int reconnect;
-
-
-        public DefaultConnectionWatchdog(Bootstrap bootstrap, ITimer timer, int port, string host, int reconnect) : base(bootstrap, timer, port, host, reconnect)
-        {
-            this.boot = bootstrap;
-            this.timer = timer;
-            this.host = host;
-            this.port = port;
-            this.reconnect = reconnect;
-        }
-
-        public override IChannelHandler[] handlers()
-        {
-            return new IChannelHandler[] {
-                this,
-                new IdleStateHandler(0, 4, 0),
-                this.idleStateTrigger,
-                new StringDecoder(),
-                new StringEncoder(),
-                new HeartBeatClientHandler()
-             };
-        }
+    
     }
 }

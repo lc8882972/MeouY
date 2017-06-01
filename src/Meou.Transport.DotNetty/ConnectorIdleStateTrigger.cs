@@ -19,6 +19,7 @@ namespace Meou.Transport.DotNetty
                 if (state == IdleState.WriterIdle)
                 {
                     // write heartbeat to server  
+                    //context.WriteAndFlushAsync(Heartbeats.HeartbeatContent());
                     context.WriteAndFlushAsync(buffer);
                 }
             } else {
