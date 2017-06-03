@@ -13,7 +13,6 @@ namespace Meou.Transport.DotNetty
         public override void UserEventTriggered(IChannelHandlerContext context, object @event)
         {
             if (@event is IdleStateEvent) {
-
                 if (IdleState.ReaderIdle == ((IdleStateEvent)@event).State)
                 {
                     throw new Exception("idle exception");
