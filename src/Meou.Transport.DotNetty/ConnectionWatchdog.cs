@@ -52,7 +52,6 @@ namespace Meou.Transport
             Console.WriteLine(reconnect);
             if (reconnect > 0)
             {
-                Console.WriteLine("链接关闭，将进行重连");
                 if (attempts <= reconnect)
                 {
                     attempts++;
@@ -60,7 +59,6 @@ namespace Meou.Transport
                 Console.WriteLine(attempts);
                 //重连的间隔时间会越来越长  
                 int timeout = 2 << attempts;
-                Console.WriteLine($"间隔时间：{timeout}");
                 timer.NewTimeout(this, TimeSpan.FromMilliseconds(timeout));
             }
             context.FireChannelInactive();
@@ -85,8 +83,6 @@ namespace Meou.Transport
             //如果重连失败，则调用ChannelInactive方法，再次出发重连事件，一直尝试12次，如果失败则不再重连  
             if (future == null)
             {
-                Console.WriteLine("重连失败");
-
                 if (attempts <= reconnect)
                 {
                     attempts++;

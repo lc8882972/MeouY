@@ -8,29 +8,32 @@ namespace Meou.Transport.DotNetty
 {
     public class HeartBeatClientHandler : ChannelHandlerAdapter
     {
+        public override bool IsSharable => true;
+
         public override void ChannelActive(IChannelHandlerContext context)
         {
-            Console.WriteLine("激活时间是：" + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"));
-            Console.WriteLine("HeartBeatClientHandler channelActive");
+            RequestBytes req = new RequestBytes();
+            req.SetBytes(1, Encoding.UTF8.GetBytes("hello"));
+            context.WriteAsync(req);
+            context.Flush();
             context.FireChannelActive();
         }
 
         public override void ChannelInactive(IChannelHandlerContext context)
         {
-            Console.WriteLine("停止时间是：" + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"));
-            Console.WriteLine("HeartBeatClientHandler channelInactive");
+            //Console.WriteLine("停止时间是：" + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"));
+            //Console.WriteLine("HeartBeatClientHandler channelInactive");
+            context.CloseAsync().Wait();
         }
 
         public override void ChannelRead(IChannelHandlerContext context, object message)
         {
-            String msg = (String)message;
-            Console.WriteLine(message);
-            if (message.Equals("Heartbeat"))
-            {
-                context.WriteAsync("has read message from server");
-                context.Flush();
-            }
-            ReferenceCountUtil.Release(msg);
+            ResponseBytes resp = message as ResponseBytes;
+            string msg = Encoding.UTF8.GetString(resp.Bytes);
+            Console.WriteLine(msg);
+            context.Flush();
+
+            ReferenceCountUtil.Release(message);
         }
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)

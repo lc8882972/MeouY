@@ -9,7 +9,7 @@ namespace Meou.Transport.DotNetty
 {
     public class ConnectorIdleStateTrigger : ChannelHandlerAdapter
     {
-        private static IByteBuffer buffer = Unpooled.WrappedBuffer(UTF8Encoding.UTF8.GetBytes("Heartbeat"));
+        private static IByteBuffer buffer = Unpooled.WrappedBuffer(Heartbeats.HeartbeatContent());
         public override bool IsSharable => true;
 
         public override void UserEventTriggered(IChannelHandlerContext context, object evt)
@@ -19,8 +19,8 @@ namespace Meou.Transport.DotNetty
                 if (state == IdleState.WriterIdle)
                 {
                     // write heartbeat to server  
-                    //context.WriteAndFlushAsync(Heartbeats.HeartbeatContent());
                     context.WriteAndFlushAsync(buffer);
+                    Console.WriteLine("发送心跳");
                 }
             } else {
                 base.UserEventTriggered(context, evt);

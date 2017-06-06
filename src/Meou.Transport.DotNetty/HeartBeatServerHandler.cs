@@ -9,10 +9,16 @@ namespace Meou.Transport.DotNetty
     {
         public override void ChannelRead(IChannelHandlerContext context, object message)
         {
-            //var isR = message is RequestBytes;
-            Console.WriteLine(context.Channel.RemoteAddress + "->Server :" + message.ToString());
-           
-            context.WriteAndFlushAsync("Heartbeat").Wait();
+            
+            RequestBytes req = message as RequestBytes;
+
+            string msg = System.Text.Encoding.UTF8.GetString(req.Bytes);
+
+            Console.WriteLine(context.Channel.RemoteAddress + "->Server :" + msg);
+            ResponseBytes resp = new ResponseBytes(req.InvokeId);
+            resp.SetBytes(1,System.Text.Encoding.UTF8.GetBytes("response from server"));
+            resp.Status = 1;
+            context.WriteAndFlushAsync(resp).Wait();
         }
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)

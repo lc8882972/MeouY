@@ -36,7 +36,7 @@ namespace Meou.Transport.DotNetty
         private byte _serializerCode;    // sign 高地址4位
         private byte _status;            // 响应状态码
         private long _id;                // request.invokeId, 用于映射 <id, request, response> 三元组
-        private int _bodyLength;         // 消息体长度
+        private int _bodyLength =0;         // 消息体长度
 
         public static byte toSign(byte serializerCode, byte messageCode)
         {

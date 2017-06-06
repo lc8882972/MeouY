@@ -17,7 +17,8 @@ namespace Meou.Transport.DotNetty
         private int port;
         private string host;
         private int reconnect;
-        private ProtocolEncoder encoder = new ProtocolEncoder();
+        private readonly ProtocolEncoder encoder = new ProtocolEncoder();
+        private HeartBeatClientHandler handler = new HeartBeatClientHandler();
 
         public DefaultConnectionWatchdog(Bootstrap bootstrap, ITimer timer, int port, string host, int reconnect) : base(bootstrap, timer, port, host, reconnect)
         {
@@ -35,9 +36,9 @@ namespace Meou.Transport.DotNetty
                 this,
                 new IdleStateHandler(0, 4, 0),
                 this.idleStateTrigger,
-                new StringDecoder(),
-                new StringEncoder(),
-                new HeartBeatClientHandler()
+                new ProtocolDecoder(),
+                encoder,
+                handler
              };
         }
     }

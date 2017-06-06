@@ -53,15 +53,14 @@ namespace Meou.Transport.DotNetty
         private void EncodeRequest(RequestBytes request, IByteBuffer output)
         {
             byte sign = ProtocolHeader.toSign(request.SerializerCode, ProtocolHeader.REQUEST);
-            long invokeId = request.invokeId();
+            long invokeId = request.InvokeId;
             byte[] bytes = request.Bytes;
             int length = bytes.Length;
-
             output.WriteShort(ProtocolHeader.MAGIC)
                 .WriteByte(sign)
                 .WriteByte(0x00)
                 .WriteLong(invokeId)
-                .WriteByte(length)
+                .WriteInt(length)
                 .WriteBytes(bytes);
         }
 

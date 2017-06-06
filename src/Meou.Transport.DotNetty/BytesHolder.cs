@@ -6,32 +6,33 @@ namespace Meou.Transport.DotNetty
 {
     public class BytesHolder
     {
-        private byte[] _bytes;
-        private byte _serializerCode;
+        private byte[] bytes;
+        private byte serializerCode;
 
         public byte SerializerCode
         {
-            get { return this._serializerCode; }
-            set { this._serializerCode = value; }
+            get { return this.serializerCode; }
+            //set { this.serializerCode = value; }
         }
         public byte[] Bytes
         {
-            get { return this._bytes; }
+            get { return this.bytes; }
         }
 
         public void SetBytes(byte serializerCode,byte[] bytes)
         {
-            this._bytes = bytes;
+            this.bytes = bytes;
         }
 
-        public void nullBytes()
+        public void NullBytes()
         {
-            _bytes = null; // help gc
+            bytes = null; // help gc
         }
 
-        public int size()
+
+        public int Size
         {
-            return _bytes == null ? 0 : _bytes.Length;
+            get { return bytes == null ? 0 : bytes.Length; }
         }
     }
 }

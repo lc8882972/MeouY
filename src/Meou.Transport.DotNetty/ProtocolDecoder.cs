@@ -13,13 +13,19 @@ namespace Meou.Transport.DotNetty
         //public override bool IsSharable => true;
         public ProtocolDecoder() : base(StateEnum.HEADER_MAGIC)
         {
-
+           
         }
-        private ProtocolHeader header = new ProtocolHeader();
+        private ProtocolHeader header = new ProtocolHeader() ;
+ 
         private int MAX_BODY_SIZE = 1024 * 1024 * 4;
 
         protected override void Decode(IChannelHandlerContext context, IByteBuffer input, List<object> output)
         {
+            if (input is EmptyByteBuffer)
+            {
+                return;
+            }
+                         
             switch (State)
             {
                 case StateEnum.HEADER_MAGIC:
@@ -37,10 +43,10 @@ namespace Meou.Transport.DotNetty
                 case StateEnum.HEADER_ID:
                     header.id(input.ReadLong());           // 消息id
                     Checkpoint(StateEnum.HEADER_BODY_LENGTH);
-
                     break;
                 case StateEnum.HEADER_BODY_LENGTH:
-                    header.bodyLength(input.ReadInt());    // 消息体长度
+                    var bodyLen = input.ReadInt();
+                    header.bodyLength(bodyLen);    // 消息体长度
                     Checkpoint(StateEnum.BODY);
                     break;
                 case StateEnum.BODY:
@@ -50,13 +56,13 @@ namespace Meou.Transport.DotNetty
                             break;
 
                         case ProtocolHeader.REQUEST:
-
+                          
                             int length = checkBodyLength(header.bodyLength());
                             byte[] bytes = new byte[length];
                             input.ReadBytes(bytes);
 
                             RequestBytes request = new RequestBytes(header.id());
-                            //request.timestamp(SystemClock.millisClock().now());
+                            request.Timestamp = 1496732080L;
                             request.SetBytes(header.serializerCode(), bytes);
                             output.Add(request);
 
@@ -72,7 +78,6 @@ namespace Meou.Transport.DotNetty
                             response.SetBytes(header.serializerCode(), respbytes);
                             output.Add(response);
                             break;
-
                     }
                     Checkpoint(StateEnum.HEADER_MAGIC);
                     break;

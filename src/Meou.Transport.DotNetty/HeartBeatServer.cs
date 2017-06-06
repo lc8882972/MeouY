@@ -15,6 +15,7 @@ namespace Meou.Transport.DotNetty
     public class HeartBeatServer
     {
         private AcceptorIdleStateTrigger idleStateTrigger = new AcceptorIdleStateTrigger();
+       
         private int port;
         private string host = "0.0.0.0";
 
@@ -62,20 +63,22 @@ namespace Meou.Transport.DotNetty
             }
         }
 
-        private class ActionChannelInitializer : ChannelInitializer<ISocketChannel>
+        private class ActionChannelInitializer : ChannelInitializer<IChannel>
         {
+            private readonly ProtocolEncoder encoder = new ProtocolEncoder();
             private AcceptorIdleStateTrigger idleStateTrigger;
             public ActionChannelInitializer(AcceptorIdleStateTrigger idleStateTrigger)
             {
                 this.idleStateTrigger = idleStateTrigger;
             }
-            protected override void InitChannel(ISocketChannel channel)
+            protected override void InitChannel(IChannel channel)
             {
-                channel.Pipeline.AddLast(new IdleStateHandler(8, 0, 0));
-                channel.Pipeline.AddLast(idleStateTrigger);
-                channel.Pipeline.AddLast("decoder", new StringDecoder());
-                channel.Pipeline.AddLast("encoder", new StringEncoder());
-                channel.Pipeline.AddLast(new HeartBeatServerHandler());
+                channel.Pipeline.AddLast(
+                    new IdleStateHandler(8, 0, 0),
+                    idleStateTrigger,
+                    new ProtocolDecoder(),
+                    encoder,
+                    new HeartBeatServerHandler());
             }
         }
     }

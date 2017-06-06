@@ -15,11 +15,9 @@ namespace Meou.Transport.DotNetty
         // 才有溢出的可能, 比如一个100万qps的系统把 <0 ~ Long.MAX_VALUE> 范围内的id都使用完大概需要29万年.
         //
         // 未来jupiter可能将invokeId限制在48位, 留出高地址的16位作为扩展字段.
-
-
         // 用于映射 <id, request, response> 三元组
-        private long _invokeId;
-        public long _timestamp;
+        private long invokeId;
+        public long timestamp;
         private static long sequence = 0L;
 
 
@@ -31,22 +29,18 @@ namespace Meou.Transport.DotNetty
 
         public RequestBytes(long invokeId)
         {
-            this._invokeId = invokeId;
+            this.invokeId = invokeId;
         }
 
-        public long invokeId()
+        public long InvokeId
         {
-            return this._invokeId;
+            get { return this.invokeId; }
         }
 
-        public long timestamp()
+        public long Timestamp
         {
-            return this._timestamp;
-        }
-
-        public void timestamp(long timestamp)
-        {
-            this._timestamp = timestamp;
+            get { return this.timestamp; }
+            set { this.timestamp = value; }
         }
     }
 }
