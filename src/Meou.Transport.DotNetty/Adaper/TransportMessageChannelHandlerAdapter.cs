@@ -1,5 +1,6 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Transport.Channels;
+using Meou.Transport.DotNetty;
 using Rabbit.Rpc.Transport.Codec;
 
 namespace Rabbit.Transport.DotNetty.Adaper
@@ -17,8 +18,8 @@ namespace Rabbit.Transport.DotNetty.Adaper
 
         public override void ChannelRead(IChannelHandlerContext context, object message)
         {
-            var buffer = (IByteBuffer)message;
-            var data = buffer.ToArray();
+            BytesHolder buffer = message as BytesHolder;
+            var data = buffer.Bytes;
             var transportMessage = _transportMessageDecoder.Decode(data);
             context.FireChannelRead(transportMessage);
         }

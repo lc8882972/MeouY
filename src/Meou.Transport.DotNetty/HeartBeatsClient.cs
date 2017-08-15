@@ -23,18 +23,24 @@ namespace Meou.Transport.DotNetty
 
         public IChannel Connect(string host, int port ,int reconnect)
         {
+            IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Parse(host), port);
+            return Connect(ipEndPoint, reconnect);
+        }
+
+        public IChannel Connect(EndPoint endPoint, int reconnect)
+        {
             IEventLoopGroup group = new MultithreadEventLoopGroup();
             IChannel channel;
-
+            IPEndPoint ip = (IPEndPoint)endPoint;
             boot = new Bootstrap();
-            watchdog = new DefaultConnectionWatchdog(boot, timer, port, host, reconnect);
+            watchdog = new DefaultConnectionWatchdog(boot, timer, endPoint, reconnect);
             boot.Group(group)
                 .Channel<TcpSocketChannel>()
                 .Handler(new LoggingHandler(LogLevel.INFO))
                 .Handler(new DefaultChannelInitializer(watchdog)); ;
             try
             {
-                channel = boot.ConnectAsync(new IPEndPoint(IPAddress.Parse(host), port)).ConfigureAwait(false).GetAwaiter().GetResult();
+                channel = boot.ConnectAsync(endPoint).ConfigureAwait(false).GetAwaiter().GetResult();
                 return channel;
             }
             catch (Exception e)

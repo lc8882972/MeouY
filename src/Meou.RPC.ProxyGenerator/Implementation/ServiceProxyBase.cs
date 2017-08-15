@@ -74,6 +74,20 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
             });
         }
 
+        //protected void InvokeX(IDictionary<string, object> parameters, string serviceId)
+        //{
+        //     var task = _remoteInvokeService.InvokeAsync(new RemoteInvokeContext
+        //    {
+        //        InvokeMessage = new RemoteInvokeMessage
+        //        {
+        //            Parameters = parameters,
+        //            ServiceId = serviceId
+        //        }
+        //    });
+
+        //    task.Wait();
+        //}
+
         #endregion Protected Method
     }
 }

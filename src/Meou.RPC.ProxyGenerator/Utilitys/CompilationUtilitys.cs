@@ -52,7 +52,7 @@ namespace Rabbit.Rpc.ProxyGenerator.Utilitys
         {
             trees = trees.Concat(new[] { GetAssemblyInfo(assemblyInfo) });
             var compilation = CSharpCompilation.Create(assemblyName, trees, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
+            
             var stream = new MemoryStream();
             var result = compilation.Emit(stream);
             if (!result.Success && logger != null)

@@ -15,8 +15,7 @@ namespace Meou.Transport
         private readonly Bootstrap bootstrap;
         private IChannel channel;
         private readonly ITimer timer;
-        private readonly int port;
-        private readonly String host;
+        private readonly EndPoint endPoint;
         private volatile int reconnect = 6;
         private int attempts;
         private static object lookobj = new object();
@@ -26,12 +25,11 @@ namespace Meou.Transport
             get { return true; }
         }
 
-        public ConnectionWatchdog(Bootstrap bootstrap, ITimer timer, int port, string host, int reconnect)
+        public ConnectionWatchdog(Bootstrap bootstrap, ITimer timer, EndPoint endPoint, int reconnect)
         {
             this.bootstrap = bootstrap;
             this.timer = timer;
-            this.port = port;
-            this.host = host;
+            this.endPoint = endPoint;
             this.reconnect = reconnect;
         }
 
@@ -40,7 +38,7 @@ namespace Meou.Transport
 
         public override void ChannelActive(IChannelHandlerContext context)
         {
-            Console.WriteLine("当前链路已经激活了，重连尝试次数重新置为0");
+            //Console.WriteLine("当前链路已经激活了，重连尝试次数重新置为0");
             channel = context.Channel;
             attempts = 0;
             context.FireChannelActive();
@@ -72,7 +70,7 @@ namespace Meou.Transport
                 lock (lookobj)
                 {
                     bootstrap.Handler(new DefaultChannelInitializer(handlers()));
-                    future = bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(host), port)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    future = bootstrap.ConnectAsync(this.endPoint).ConfigureAwait(false).GetAwaiter().GetResult();
                 }
             }
             catch (Exception e)

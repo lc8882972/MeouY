@@ -1,7 +1,9 @@
 ﻿using DotNetty.Codecs;
+using DotNetty.Handlers.Timeout;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using Meou.Transport.DotNetty;
 using Microsoft.Extensions.Logging;
 using Rabbit.Rpc.Messages;
 using Rabbit.Rpc.Transport;
@@ -20,6 +22,8 @@ namespace Rabbit.Transport.DotNetty
         private readonly ILogger<DotNettyServerMessageListener> _logger;
         private readonly ITransportMessageDecoder _transportMessageDecoder;
         private readonly ITransportMessageEncoder _transportMessageEncoder;
+        private AcceptorIdleStateTrigger idleStateTrigger = new AcceptorIdleStateTrigger();
+        private readonly ProtocolEncoder encoder = new ProtocolEncoder();
         private IChannel _channel;
 
         #endregion Field
@@ -69,9 +73,13 @@ namespace Rabbit.Transport.DotNetty
                 .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
                 {
                     var pipeline = channel.Pipeline;
-                    pipeline.AddLast(new LengthFieldPrepender(4));
-                    pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                    pipeline.AddLast(new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
+                    pipeline.AddLast(
+                        new IdleStateHandler(8, 0, 0),
+                        idleStateTrigger,
+                        new ProtocolDecoder(),
+                        encoder, 
+                        new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
+
                     pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
                     {
                         var sender = new DotNettyServerMessageSender(_transportMessageEncoder, contenxt);
@@ -92,7 +100,7 @@ namespace Rabbit.Transport.DotNetty
             Task.Run(async () =>
             {
                 await _channel.DisconnectAsync();
-            }).Wait();
+            });
         }
 
         #endregion Implementation of IDisposable

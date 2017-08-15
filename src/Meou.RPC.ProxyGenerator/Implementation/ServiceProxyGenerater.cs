@@ -75,7 +75,7 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
 #else
                 var assembly = AssemblyLoadContext.Default.LoadFromStream(stream);
 #endif
-
+        
                 return assembly.GetExportedTypes();
             }
         }
@@ -260,6 +260,7 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                             IdentifierName(parameter.Name)})));
                 parameterList.Add(Token(SyntaxKind.CommaToken));
             }
+
             if (parameterList.Any())
             {
                 parameterList.RemoveAt(parameterList.Count - 1);
@@ -277,13 +278,13 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
 
             if (method.ReturnType != typeof(Task))
             {
-                expressionSyntax = GenericName(
-                    Identifier("Invoke")).WithTypeArgumentList(((GenericNameSyntax)returnDeclaration).TypeArgumentList);
+                expressionSyntax = GenericName(Identifier("Invoke")).WithTypeArgumentList(((GenericNameSyntax)returnDeclaration).TypeArgumentList);
             }
             else
             {
                 expressionSyntax = IdentifierName("Invoke");
             }
+
             expressionSyntax = AwaitExpression(
                 InvocationExpression(expressionSyntax)
                     .WithArgumentList(
@@ -327,9 +328,7 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                 statementSyntax = ExpressionStatement(expressionSyntax);
             }
 
-            declaration = declaration.WithBody(
-                        Block(
-                            SingletonList(statementSyntax)));
+            declaration = declaration.WithBody(Block(SingletonList(statementSyntax)));
 
             return declaration;
         }

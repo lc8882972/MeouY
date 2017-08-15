@@ -10,7 +10,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Meou.Transport.DotNetty\Meou.Transport.DotNetty.csproj" />
+    <ProjectReference Include="..\Echo.Service\Echo.Service.csproj" />
+    <ProjectReference Include="..\..\src\Meou.Common\Meou.Common.csproj" />
+    <ProjectReference Include="..\..\src\Meou.Registry.Zookeeper\Meou.Registry.Zookeeper.csproj" />
   </ItemGroup>
 
 </Project>

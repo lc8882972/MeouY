@@ -1,5 +1,6 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Transport.Channels;
+using Meou.Transport.DotNetty;
 using Rabbit.Rpc.Messages;
 using Rabbit.Rpc.Transport;
 using Rabbit.Rpc.Transport.Codec;
@@ -20,12 +21,12 @@ namespace Rabbit.Transport.DotNetty
             _transportMessageEncoder = transportMessageEncoder;
         }
 
-        protected IByteBuffer GetByteBuffer(TransportMessage message)
+        protected byte [] GetByteBuffer(TransportMessage message)
         {
             var data = _transportMessageEncoder.Encode(message);
 
-            var buffer = Unpooled.Buffer(data.Length, data.Length);
-            return buffer.WriteBytes(data);
+            //var buffer = Unpooled.Buffer(data.Length, data.Length);
+            return data;
         }
     }
 
@@ -49,7 +50,7 @@ namespace Rabbit.Transport.DotNetty
             Task.Run(async () =>
             {
                 await _channel.DisconnectAsync();
-            }).Wait();
+            });
         }
 
         #endregion Implementation of IDisposable
@@ -64,7 +65,9 @@ namespace Rabbit.Transport.DotNetty
         public async Task SendAsync(TransportMessage message)
         {
             var buffer = GetByteBuffer(message);
-            await _channel.WriteAsync(buffer);
+            RequestBytes req = new RequestBytes(message.Id);
+            req.SetBytes(1, buffer);
+            await _channel.WriteAsync(req);
         }
 
         /// <summary>
@@ -75,7 +78,9 @@ namespace Rabbit.Transport.DotNetty
         public async Task SendAndFlushAsync(TransportMessage message)
         {
             var buffer = GetByteBuffer(message);
-            await _channel.WriteAndFlushAsync(buffer);
+            RequestBytes req = new RequestBytes(message.Id);
+            req.SetBytes(1, buffer);
+            await _channel.WriteAndFlushAsync(req);
         }
 
         #endregion Implementation of IMessageSender
@@ -103,7 +108,9 @@ namespace Rabbit.Transport.DotNetty
         public Task SendAsync(TransportMessage message)
         {
             var buffer = GetByteBuffer(message);
-            return _context.WriteAsync(buffer);
+            ResponseBytes resp = new ResponseBytes(message.Id);
+            resp.SetBytes(1, buffer);
+            return _context.WriteAsync(resp);
         }
 
         /// <summary>
@@ -114,7 +121,9 @@ namespace Rabbit.Transport.DotNetty
         public Task SendAndFlushAsync(TransportMessage message)
         {
             var buffer = GetByteBuffer(message);
-            return _context.WriteAndFlushAsync(buffer);
+            ResponseBytes resp = new ResponseBytes(message.Id);
+            resp.SetBytes(1, buffer);
+            return _context.WriteAndFlushAsync(resp);
         }
 
         #endregion Implementation of IMessageSender

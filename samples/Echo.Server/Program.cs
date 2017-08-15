@@ -16,12 +16,12 @@ namespace Echo.Server
 {
     public class Program
     {
-        static Program()
-        {
-            //因为没有引用Echo.Common中的任何类型
-            //所以强制加载Echo.Common程序集以保证Echo.Common在AppDomain中被加载。
-            Assembly.Load(new AssemblyName("Echo.Service"));
-        }
+        //static Program()
+        //{
+        //    //因为没有引用Echo.Common中的任何类型
+        //    //所以强制加载Echo.Common程序集以保证Echo.Common在AppDomain中被加载。
+        //    Assembly.Load(new AssemblyName("Echo.Service"));
+        //}
 
         public static void Main(string[] args)
         {

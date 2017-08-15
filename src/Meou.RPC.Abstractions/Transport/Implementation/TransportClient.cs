@@ -20,8 +20,8 @@ namespace Rabbit.Rpc.Transport.Implementation
         private readonly ILogger _logger;
         private readonly IServiceExecutor _serviceExecutor;
 
-        private readonly ConcurrentDictionary<string, TaskCompletionSource<TransportMessage>> _resultDictionary =
-            new ConcurrentDictionary<string, TaskCompletionSource<TransportMessage>>();
+        private readonly ConcurrentDictionary<long, TaskCompletionSource<TransportMessage>> _resultDictionary =
+            new ConcurrentDictionary<long, TaskCompletionSource<TransportMessage>>();
 
         #endregion Field
 
@@ -109,7 +109,7 @@ namespace Rabbit.Rpc.Transport.Implementation
         /// </summary>
         /// <param name="id">消息Id。</param>
         /// <returns>远程调用结果消息模型。</returns>
-        private async Task<RemoteInvokeResultMessage> RegisterResultCallbackAsync(string id)
+        private async Task<RemoteInvokeResultMessage> RegisterResultCallbackAsync(long id)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备获取Id为：{id}的响应内容。");

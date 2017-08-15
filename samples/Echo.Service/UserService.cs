@@ -1,19 +1,27 @@
-﻿using Meou.Registry.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Meou.Registry.Abstractions;
+using Meou.Common;
 
 namespace Echo.Service
 {
     [ServiceProviderImpl(version ="0.0.0")]
     public class UserService : IUserService
     {
+        //private readonly ILogger logger;
+        //public UserService(LoggerFactory loggerFactory)
+        //{
+        //    this.logger = loggerFactory.CreateLogger<UserService>();
+        //}
         #region Implementation of IUserService
 
-        public Task<string> GetUserName(int id)
+        public Task<ActionResult> GetUserName(int id)
         {
-            return Task.FromResult($"id:{id} is name rabbit.");
+            //this.logger.LogDebug($"id:{id} is name rabbit.");
+            return Task.FromResult<ActionResult>( new ActionResult() { data = $"id:{id} is name rabbit." });
         }
 
         public Task<bool> Exists(int id)

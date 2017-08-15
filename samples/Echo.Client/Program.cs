@@ -45,13 +45,13 @@ namespace Echo.Client
             var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
             while (true)
             {
-                Task.Run(async () =>
+                Task.Run( () =>
                 {
                     try
                     {
                         Stopwatch watch = new Stopwatch();
                         watch.Start();
-                        Console.WriteLine($"userService.GetUserName:{await userService.GetUserName(1)}");
+                        userService.GetUserName(1);
                         watch.Stop();
                         logger.LogInformation($"执行耗时：{watch.ElapsedMilliseconds}/ms");
                     }

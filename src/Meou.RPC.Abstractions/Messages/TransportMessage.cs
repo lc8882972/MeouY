@@ -7,6 +7,7 @@ namespace Rabbit.Rpc.Messages
     /// </summary>
     public class TransportMessage
     {
+        private static readonly Snowflake.IdWorker idWorker = new Snowflake.IdWorker(1, 1);
         public TransportMessage()
         {
         }
@@ -20,10 +21,14 @@ namespace Rabbit.Rpc.Messages
             ContentType = content.GetType().FullName;
         }
 
+        public static long NextId()
+        {
+            return idWorker.NextId();
+        }
         /// <summary>
         /// 消息Id。
         /// </summary>
-        public string Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// 消息内容。
@@ -72,7 +77,7 @@ namespace Rabbit.Rpc.Messages
         {
             return new TransportMessage(invokeMessage)
             {
-                Id = Guid.NewGuid().ToString("N")
+                Id = NextId()
             };
         }
 
@@ -82,7 +87,7 @@ namespace Rabbit.Rpc.Messages
         /// <param name="id">消息Id。</param>
         /// <param name="invokeResultMessage">调用结果实例。</param>
         /// <returns>调用结果传输消息。</returns>
-        public static TransportMessage CreateInvokeResultMessage(string id, RemoteInvokeResultMessage invokeResultMessage)
+        public static TransportMessage CreateInvokeResultMessage(long id, RemoteInvokeResultMessage invokeResultMessage)
         {
             return new TransportMessage(invokeResultMessage)
             {

@@ -38,7 +38,7 @@ namespace Rabbit.Rpc.Codec.ProtoBuffer.Messages
         /// 消息Id。
         /// </summary>
         [ProtoMember(1)]
-        public string Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// 消息内容。

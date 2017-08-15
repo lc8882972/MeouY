@@ -40,5 +40,11 @@ namespace Meou.Transport.DotNetty
         {
             context.CloseAsync().Wait();
         }
+
+        public override void ChannelWritabilityChanged(IChannelHandlerContext context)
+        {
+            
+            base.ChannelWritabilityChanged(context);
+        }
     }
 }

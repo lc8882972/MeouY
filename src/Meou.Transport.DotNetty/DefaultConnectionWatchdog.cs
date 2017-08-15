@@ -5,6 +5,7 @@ using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 
 namespace Meou.Transport.DotNetty
@@ -13,20 +14,14 @@ namespace Meou.Transport.DotNetty
     {
         private ConnectorIdleStateTrigger idleStateTrigger = new ConnectorIdleStateTrigger();
         private Bootstrap boot;
-        private ITimer timer;
-        private int port;
-        private string host;
-        private int reconnect;
+
+
+
         private readonly ProtocolEncoder encoder = new ProtocolEncoder();
         private HeartBeatClientHandler handler = new HeartBeatClientHandler();
 
-        public DefaultConnectionWatchdog(Bootstrap bootstrap, ITimer timer, int port, string host, int reconnect) : base(bootstrap, timer, port, host, reconnect)
+        public DefaultConnectionWatchdog(Bootstrap bootstrap, ITimer timer, EndPoint endPoint, int reconnect) : base(bootstrap, timer, endPoint, reconnect)
         {
-            this.boot = bootstrap;
-            this.timer = timer;
-            this.host = host;
-            this.port = port;
-            this.reconnect = reconnect;
         }
 
 

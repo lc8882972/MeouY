@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Meou.Common;
+using Microsoft.Extensions.Logging;
 using Rabbit.Rpc.Messages;
 using Rabbit.Rpc.Transport;
 using System;
@@ -96,20 +97,17 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation
             try
             {
                 var result = await entry.Func(remoteInvokeMessage.Parameters);
-                var task = result as Task;
 
-                if (task == null)
-                {
-                    resultMessage.Result = result;
-                }
-                else
-                {
-                    task.Wait();
-
-                    var taskType = task.GetType().GetTypeInfo();
-                    if (taskType.IsGenericType)
-                        resultMessage.Result = taskType.GetProperty("Result").GetValue(task);
-                }
+                resultMessage.Result = result;
+                //if (result.GetType() == typeof(Task))
+                //{
+                //    resultMessage.Result = null;
+                //}
+                //else
+                //{
+                //    var task = result as Task<ActionResult>;
+                //    resultMessage.Result  = await task;
+                //}
             }
             catch (Exception exception)
             {
@@ -119,7 +117,7 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation
             }
         }
 
-        private async Task SendRemoteInvokeResult(IMessageSender sender, string messageId, RemoteInvokeResultMessage resultMessage)
+        private async Task SendRemoteInvokeResult(IMessageSender sender, long messageId, RemoteInvokeResultMessage resultMessage)
         {
             try
             {

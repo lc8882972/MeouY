@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Meou.Transport.DotNetty
 {
-    public class BytesHolder
+    public abstract  class BytesHolder
     {
         private byte[] bytes;
         private byte serializerCode;
@@ -12,8 +12,8 @@ namespace Meou.Transport.DotNetty
         public byte SerializerCode
         {
             get { return this.serializerCode; }
-            //set { this.serializerCode = value; }
         }
+
         public byte[] Bytes
         {
             get { return this.bytes; }
@@ -28,7 +28,6 @@ namespace Meou.Transport.DotNetty
         {
             bytes = null; // help gc
         }
-
 
         public int Size
         {

@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using Meou.Registry.Abstractions;
+using Meou.Common;
 
 namespace Echo.Service
 {
@@ -18,7 +19,7 @@ namespace Echo.Service
     [ServiceProvider(group = "TestGroup", name = "IUserService" ,version ="0.0.0")]
     public interface IUserService
     {
-        Task<string> GetUserName(int id);
+        Task<ActionResult> GetUserName(int id);
 
         Task<bool> Exists(int id);
 

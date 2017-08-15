@@ -9,6 +9,7 @@ using Rabbit.Rpc.Convertibles;
 using Rabbit.Rpc.Ids;
 using Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using System.Diagnostics;
+using Meou.Common;
 
 namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementation
 {
@@ -28,7 +29,7 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementati
 
         #region Constructor
 
-        public ClrServiceEntryFactory(IServiceProvider serviceProvider, IServiceIdGenerator serviceIdGenerator, ITypeConvertibleService typeConvertibleService,ILoggerFactory loggerFactory)
+        public ClrServiceEntryFactory(IServiceProvider serviceProvider, IServiceIdGenerator serviceIdGenerator, ITypeConvertibleService typeConvertibleService, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _serviceIdGenerator = serviceIdGenerator;
@@ -77,32 +78,33 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementati
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
-                Func = parameters =>
-               {
+                Func = async (parameters) =>
+                {
+                    Stopwatch watch = new Stopwatch();
+                    watch.Start();
+                    var serviceScopeFactory = _serviceProvider.GetService<IServiceScopeFactory>();
+                    using (var scope = serviceScopeFactory.CreateScope())
+                    {
+                        var instance = scope.ServiceProvider.GetService(method.DeclaringType);
 
-                   Stopwatch watch = new Stopwatch();
-                   watch.Start();
-                   var serviceScopeFactory = _serviceProvider.GetRequiredService<IServiceScopeFactory>();
-                   using (var scope = serviceScopeFactory.CreateScope())
-                   {
-                       var instance = scope.ServiceProvider.GetRequiredService(method.DeclaringType);
+                        var list = new List<object>(implementationMethod.GetParameters().Length);
+                        foreach (var parameterInfo in implementationMethod.GetParameters())
+                        {
+                            var value = parameters[parameterInfo.Name];
+                            var parameterType = parameterInfo.ParameterType;
 
-                       var list = new List<object>();
-                       foreach (var parameterInfo in implementationMethod.GetParameters())
-                       {
-                           var value = parameters[parameterInfo.Name];
-                           var parameterType = parameterInfo.ParameterType;
+                            var parameter = _typeConvertibleService.Convert(value, parameterType);
+                            list.Add(parameter);
+                        }
 
-                           var parameter = _typeConvertibleService.Convert(value, parameterType);
-                           list.Add(parameter);
-                       }
+                        var result = implementationMethod.Invoke(instance, list.ToArray());
+                        watch.Stop();
+                        _logger.LogInformation($"执行耗时：{watch.ElapsedMilliseconds}/ms");
+                        Task<ActionResult> task = result as Task<ActionResult>;
 
-                       var result = implementationMethod.Invoke(instance, list.ToArray());
-                       watch.Stop();
-                       _logger.LogInformation($"执行耗时：{watch.ElapsedMilliseconds}/ms");
-                       return Task.FromResult(result);
-                   }
-               }
+                        return await task;
+                    }
+                }
             };
         }
 

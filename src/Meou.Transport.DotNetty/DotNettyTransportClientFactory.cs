@@ -1,5 +1,6 @@
 ﻿using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
+using DotNetty.Handlers.Timeout;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -25,13 +26,15 @@ namespace Rabbit.Transport.DotNetty
     public class DotNettyTransportClientFactory : ITransportClientFactory, IDisposable
     {
         #region Field
-        protected readonly HashedWheelTimer timer = new HashedWheelTimer();
+        //protected readonly HashedWheelTimer timer = new HashedWheelTimer();
         private readonly ITransportMessageEncoder _transportMessageEncoder;
         private readonly ITransportMessageDecoder _transportMessageDecoder;
         private readonly ILogger<DotNettyTransportClientFactory> _logger;
         private readonly IServiceExecutor _serviceExecutor;
         private readonly ConcurrentDictionary<EndPoint, Lazy<ITransportClient>> _clients = new ConcurrentDictionary<EndPoint, Lazy<ITransportClient>>();
-        private readonly Bootstrap _bootstrap;
+        //private readonly Bootstrap _bootstrap;
+        //private ConnectorIdleStateTrigger idleStateTrigger = new ConnectorIdleStateTrigger();
+        //private readonly ProtocolEncoder encoder = new ProtocolEncoder();
 
         private static readonly AttributeKey<IMessageSender> messageSenderKey = AttributeKey<IMessageSender>.ValueOf(typeof(DotNettyTransportClientFactory), nameof(IMessageSender));
         private static readonly AttributeKey<IMessageListener> messageListenerKey = AttributeKey<IMessageListener>.ValueOf(typeof(DotNettyTransportClientFactory), nameof(IMessageListener));
@@ -52,17 +55,19 @@ namespace Rabbit.Transport.DotNetty
             _transportMessageDecoder = codecFactory.GetDecoder();
             _logger = logger;
             _serviceExecutor = serviceExecutor;
-            _bootstrap = GetBootstrap();
-            _bootstrap.Handler(new ActionChannelInitializer<ISocketChannel>(c =>
-            {
-                var pipeline = c.Pipeline;
-                pipeline.AddLast(new LengthFieldPrepender(4));
-                pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                pipeline.AddLast(new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
-                pipeline.AddLast(new DefaultChannelHandler(this));
-            }));
-         
-
+            //_bootstrap = GetBootstrap();
+            //_bootstrap.Handler(new ActionChannelInitializer<ISocketChannel>(c =>
+            //{
+            //    var pipeline = c.Pipeline;
+            //    pipeline.AddLast(
+            //        new IdleStateHandler(0, 4, 0),
+            //        this.idleStateTrigger,
+            //        new ProtocolDecoder(),
+            //        encoder,
+            //        new TransportMessageChannelHandlerAdapter(_transportMessageDecoder),
+            //        new DefaultChannelHandler(this));
+            //}));
+        
         }
 
         #endregion Constructor
@@ -78,7 +83,6 @@ namespace Rabbit.Transport.DotNetty
         {
             var key = endPoint;
 
-          
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备为服务端地址：{key}创建客户端。");
             try
@@ -86,11 +90,8 @@ namespace Rabbit.Transport.DotNetty
                 return _clients.GetOrAdd(key
                     , k => new Lazy<ITransportClient>(() =>
                     {
-
-                        var bootstrap = _bootstrap;
-                        //new HeartBeatsClient().Connect(endPoint, 3);
-                        var channel = bootstrap.ConnectAsync(k).Result;
-
+                        //var bootstrap = _bootstrap;
+                        IChannel channel = new HeartBeatsClient().Connect(key, 3);
                         var messageListener = new MessageListener();
                         channel.GetAttribute(messageListenerKey).Set(messageListener);
                         var messageSender = new DotNettyMessageClientSender(_transportMessageEncoder, channel);
@@ -146,10 +147,10 @@ namespace Rabbit.Transport.DotNetty
 
             #region Overrides of ChannelHandlerAdapter
 
-            public override void ChannelInactive(IChannelHandlerContext context)
-            {
-                _factory._clients.TryRemove(context.Channel.GetAttribute(origEndPointKey).Get(), out var value);
-            }
+            //public override void ChannelInactive(IChannelHandlerContext context)
+            //{
+            //    _factory._clients.TryRemove(context.Channel.GetAttribute(origEndPointKey).Get(), out var value);
+            //}
 
             public override void ChannelRead(IChannelHandlerContext context, object message)
             {
